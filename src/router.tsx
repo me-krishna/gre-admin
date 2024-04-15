@@ -28,9 +28,9 @@ const router = createBrowserRouter([
         }),
       },
       {
-        path: "leads",
+        path: "students",
         lazy: async () => ({
-          Component: (await import("./pages/leads")).default,
+          Component: (await import("./pages/students")).default,
         }),
       },
       {

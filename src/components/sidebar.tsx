@@ -45,7 +45,7 @@ export default function Sidebar2({
         <LayoutHeader className='sticky top-0 justify-between px-4 py-3 md:px-4'>
           <div>
             {/* Logo */}
-            <img src='https://res.cloudinary.com/duthqxswg/image/upload/q_100/MilesEducationWebsite-2024/miles-logo.svg' className='w-40 h-auto'/>
+            <img src='/logo.png' className='w-40 h-11 drop-shadow-xl'/>
           </div>
 
           {/* Toggle Button in mobile */}

@@ -1,4 +1,4 @@
-import { IconLayoutDashboard , IconAd , IconActivity} from "@tabler/icons-react";
+import { IconLayoutDashboard , IconAd , IconActivity , IconUsersGroup} from "@tabler/icons-react";
 
 export interface NavLink {
   title: string;
@@ -19,10 +19,10 @@ export const sidelinks: SideLink[] = [
     icon: <IconLayoutDashboard size={18} />,
   },
   {
-    title: "Leads",
+    title: "Students",
     label: "",
-    href: "/leads",
-    icon: <IconAd size={18} />,
+    href: "/students",
+    icon: <IconUsersGroup size={18} />,
   },
   {
     title: "Visitors Tracking",

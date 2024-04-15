@@ -7,7 +7,7 @@ import {
   PaginationPrevious,
 } from "./ui/pagination";
 
-const MilesPagination = ({
+const DrRajusPagination = ({
   perPage,
   totalRecords,
   setCurrentPage,
@@ -81,4 +81,4 @@ const MilesPagination = ({
   );
 };
 
-export default MilesPagination;
+export default DrRajusPagination;

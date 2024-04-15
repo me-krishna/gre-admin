@@ -13,7 +13,7 @@ export default function MobileLogin() {
             />
           </div> */}
           <div className="mb-4 flex items-center justify-center">
-            <h1 className="text-xl font-medium">Miles TalentHub Dashboard</h1>
+            <h1 className="text-xl font-medium">Dr Raju's Admin</h1>
           </div>
           <Card className="p-6">
             <div className="mb-2 flex flex-col space-y-2 text-left">

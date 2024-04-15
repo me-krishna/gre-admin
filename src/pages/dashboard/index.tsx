@@ -5,7 +5,6 @@ const Dashboard = () => {
   useEffect(() => {
     const user = localStorage.getItem("USER-REF-DETAILS");
     user && setUser(JSON.parse(user));
-    console.log(user);
   }, []);
   return (
     <>
@@ -20,7 +19,7 @@ const Dashboard = () => {
             Hi <span className="text-purple-700 capitalize">{user.name}, </span>
           </>
         )}{" "}
-        Welcome to the Miles Talent Hub Dashboard 💐💐💐💐💐.
+        Welcome to the Dr Raju's Educational Academy Dashboard 💐💐💐💐💐.
       </p>
     </>
   );
