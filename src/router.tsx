@@ -39,6 +39,30 @@ const router = createBrowserRouter([
           Component: (await import("./pages/user-tracking")).default,
         }),
       },
+      {
+        path: "tests/test-types",
+        lazy: async () => ({
+          Component: (await import("./pages/exams/mock-test")).default,
+        }),
+      },
+      {
+        path: "tests/questions",
+        lazy: async () => ({
+          Component: (await import("./pages/exams/questions")).default,
+        }),
+      },
+      {
+        path: "tests/results",
+        lazy: async () => ({
+          Component: (await import("./pages/exams/results")).default,
+        }),
+      },
+      {
+        path : 'questions-factory',
+        lazy: async () => ({
+          Component: (await import("./pages/questions_factory/QuestionFactory")).default,
+        }),
+      },
       { path: "*", Component: NotFoundError },
     ],
   },

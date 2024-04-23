@@ -1,4 +1,12 @@
-import { IconLayoutDashboard , IconAd , IconActivity , IconUsersGroup} from "@tabler/icons-react";
+import {
+  IconLayoutDashboard,
+  IconUsersGroup,
+  IconFilePencil,
+  IconEyeCheck,
+  IconPencilQuestion,
+  IconNotebook,
+  IconDeviceIpadQuestion,
+} from "@tabler/icons-react";
 
 export interface NavLink {
   title: string;
@@ -25,9 +33,35 @@ export const sidelinks: SideLink[] = [
     icon: <IconUsersGroup size={18} />,
   },
   {
-    title: "Visitors Tracking",
+    title: "Questions Factory",
     label: "",
-    href: "/user-tracking",
-    icon: <IconActivity size={18} />,
+    href: "/questions-factory",
+    icon: <IconDeviceIpadQuestion size={18} />,
   },
+  // {
+  //   title: "Tests",
+  //   label: "",
+  //   href: "#",
+  //   icon: <IconNotebook size={18} />,
+  //   sub: [
+  //     {
+  //       title: "Test Types",
+  //       label: "",
+  //       href: "/tests/test-types",
+  //       icon: <IconFilePencil size={18} />,
+  //     },
+  //     {
+  //       title: "Questions",
+  //       label: "",
+  //       href: "/tests/questions",
+  //       icon: <IconPencilQuestion size={18} />,
+  //     },
+  //     {
+  //       title: "Results",
+  //       label: "",
+  //       href: "/tests/results",
+  //       icon: <IconEyeCheck size={18} />,
+  //     },
+  //   ],
+  // },
 ];
