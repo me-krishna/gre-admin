@@ -27,6 +27,12 @@ export const sidelinks: SideLink[] = [
     icon: <IconLayoutDashboard size={18} />,
   },
   {
+    title: "Mock Test",
+    label: "",
+    href: "/mock-test",
+    icon: <IconFilePencil size={18} />,
+  },
+  {
     title: "Students",
     label: "",
     href: "/students",
