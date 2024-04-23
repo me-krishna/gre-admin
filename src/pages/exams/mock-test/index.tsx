@@ -36,36 +36,42 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { parse } from "path";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
+import { set } from "date-fns";
+import { get } from "http";
 
 type IAction = "view" | "edit";
 
 interface IMockTest {
-  no_of_sections: number;
+  name: string;
+  no_sections: number;
   sections: ISectionTypes[];
 }
 
 interface ISectionTypes {
-  topic: string | "";
-  duration: number | "";
+  section_topic: string;
+  section_duration: number | "";
   no_of_questions: number | "";
 }
 
 const MockTest = () => {
+  const inititialBtn = {
+    submit: false,
+    text: "Submit",
+  };
   const actionBtnRef = useRef<HTMLButtonElement>(null);
-  const [action, setAction] = useState<IAction>("view");
-  const [mockTestData, setMockTestData] = useState<any[]>([]);
-  const [questionData, setQuestionData] = useState<any>({});
+  const [createButton, setCreateButton] = useState(inititialBtn);
+  const [topicsList, setTopicsList] = useState<any[]>([]);
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-
+  const { toast } = useToast();
   const [mockTestCreate, setMockTestCreate] = useState<IMockTest>({
-    no_of_sections: 1,
+    name: "",
+    no_sections: 1,
     sections: [
       {
-        topic: "",
-        duration: "",
+        section_topic: "",
+        section_duration: "",
         no_of_questions: "",
       },
     ],
@@ -87,14 +93,62 @@ const MockTest = () => {
     });
   };
 
-  const getQestionData = async () => {
-    const params = {
-      page: paginationData.currentPage,
-      limit: paginationData.perPage,
-    };
-    try {
-      const { data, status, ...res } = await api.get("/questions", { params });
+  /* Backend Intractions */
 
+  const getTopicsData = async () => {
+    try {
+      const { data, status, ...res } = await api.get("/topics/0");
+      if (status === 200 && data.data && data.data.length > 0) {
+        setTopicsList(data.data);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const submitTheCreateTest = async () => {
+    try {
+      const { data, status, ...res } = await api.post("/exam", mockTestCreate);
+      if (status === 201) {
+        seccessMsg("Mock Test Created Successfully");
+        actionBtnRef.current?.click();
+        setMockTestCreate({
+          name: "",
+          no_sections: 1,
+          sections: [
+            {
+              section_topic: "",
+              section_duration: "",
+              no_of_questions: "",
+            },
+          ],
+        });
+        if (paginationData.currentPage !== 1) {
+          setPaginationData((prev) => ({
+            ...prev,
+            currentPage: 1,
+          }));
+        } else {
+          getAllExams();
+        }
+      } else {
+        errorMsg("Failed to Create the Mock Test");
+      }
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setCreateButton(inititialBtn);
+    }
+  };
+
+  const getAllExams = async () => {
+    setLoading(true);
+    try {
+      const params = {
+        page: paginationData.currentPage,
+        limit: paginationData.perPage,
+      };
+      const { data, status, ...res } = await api.get("/exam", { params });
       if (status === 200) {
         setData(data.data);
         setPaginationData((prev) => {
@@ -111,58 +165,70 @@ const MockTest = () => {
     setLoading(false);
   };
 
-  const questionActions = (data: any, type: IAction) => {
-    setAction(type);
-    setQuestionData(data);
-    actionBtnRef.current?.click();
-  };
-
-  const deleteQuestion = (id: string) => {
-    console.log(id);
-  };
+  /* End of Backend Intractions */
 
   /*  Input Handlders */
 
   const singleInputHander = (e: React.ChangeEvent<HTMLInputElement>) => {
     const prevSectionLength = mockTestCreate.sections.length;
-    const { value } = e.target;
+    const { value, name } = e.target;
+    if (name === "no_sections" && parseInt(value) < 1) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No of sections should be greater than 0",
+      });
+      return false;
+    }
+
+    if (name === "no_sections" && parseInt(value) > 10) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No of sections should not exceed 10",
+      });
+      return false;
+    }
+
     setMockTestCreate((prev: any) => {
       return {
         ...prev,
-        no_of_sections: value,
+        [name]: value,
       };
     });
-    if (prevSectionLength < parseInt(value)) {
-      const diff = parseInt(value) - prevSectionLength;
-      for (let i = 0; i < diff; i++) {
-        setMockTestCreate((prev: any) => {
-          return {
-            ...prev,
-            sections: [
-              ...prev.sections,
-              {
-                topic: "",
-                duration: "",
-                no_of_questions: "",
-              },
-            ],
-          };
-        });
-      }
-    } else {
-      const diff = prevSectionLength - parseInt(value);
-      for (let i = 0; i < diff; i++) {
-        setMockTestCreate((prev: any) => {
-          return {
-            ...prev,
-            sections: prev.sections.slice(0, prev.sections.length - 1),
-          };
-        });
+    if (name === "no_sections") {
+      if (prevSectionLength < parseInt(value)) {
+        const diff = parseInt(value) - prevSectionLength;
+        for (let i = 0; i < diff; i++) {
+          setMockTestCreate((prev: any) => {
+            return {
+              ...prev,
+              sections: [
+                ...prev.sections,
+                {
+                  section_topic: "",
+                  section_duration: "",
+                  no_of_questions: "",
+                },
+              ],
+            };
+          });
+        }
+      } else {
+        const diff = prevSectionLength - parseInt(value);
+        for (let i = 0; i < diff; i++) {
+          setMockTestCreate((prev: any) => {
+            return {
+              ...prev,
+              sections: prev.sections.slice(0, prev.sections.length - 1),
+            };
+          });
+        }
       }
     }
   };
 
-  const sesstionsInputHandler = (
+  const sessionInputHandler = (
     e: React.ChangeEvent<HTMLInputElement>,
     idx: number
   ) => {
@@ -192,7 +258,7 @@ const MockTest = () => {
           if (i === idx) {
             return {
               ...data,
-              topic: value,
+              section_topic: value,
             };
           }
           return data;
@@ -205,105 +271,158 @@ const MockTest = () => {
 
   /* Error Handlers */
 
-  const seccessMsg  = (msg?:string)=>{
-    
-  }
+  const seccessMsg = (msg?: string) => {
+    toast({
+      variant: "default",
+      title: "Success",
+      description: msg,
+    });
+    setCreateButton(inititialBtn);
+  };
+
+  const errorMsg = (msg?: string) => {
+    toast({
+      variant: "destructive",
+      title: "Error",
+      description: msg,
+    });
+    setCreateButton(inititialBtn);
+  };
 
   /* End of Error Handlers */
 
-  const createTest = () => {
-    console.log(mockTestCreate);
+  const createTest = async () => {
+    setCreateButton({
+      submit: true,
+      text: "Submitting...",
+    });
+    if (mockTestCreate.name === "") {
+      errorMsg("Please Enter the Exam Name");
+      return false;
+    } else if (mockTestCreate.no_sections === 0) {
+      errorMsg("Please Enter the Number of Sections");
+      return false;
+    } else if (mockTestCreate.sections.length === 0) {
+      errorMsg("Please Enter the Sections");
+      return false;
+    } else if (
+      mockTestCreate.sections.some((data) => data.section_topic === "")
+    ) {
+      errorMsg("Please Select the Topic for all the Sections");
+      return false;
+    } else if (
+      mockTestCreate.sections.some((data) => data.section_duration === "")
+    ) {
+      errorMsg("Please Enter the Duration for all the Sections");
+      return false;
+    } else if (
+      mockTestCreate.sections.some((data) => data.no_of_questions === "")
+    ) {
+      errorMsg("Please Enter the No:Of Questions for all the Sections");
+      return false;
+    } else {
+      await submitTheCreateTest();
+    }
   };
 
-  useEffect(() => {}, [paginationData.currentPage]);
+  useEffect(() => {
+    getAllExams();
+  }, [paginationData.currentPage]);
+
+  useEffect(() => {
+    getTopicsData();
+  }, []);
 
   return (
     <>
       <div className="flex justify-between items-center">
-        <PageTitle title="Mock Tests"></PageTitle>
+        <PageTitle title="Test patterns"></PageTitle>
         <div className="flex justify-end gap-2 items-center">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline">
+              <Button ref={actionBtnRef} variant="outline">
                 Create <IconPlus size={14} />
               </Button>
             </SheetTrigger>
-            <SheetContent className="w-[80%] sm:max-w-[940px]">
+            <SheetContent className="w-[80%] sm:max-w-[940px] overflow-auto">
               <SheetHeader>
-                <SheetTitle>Create Mock Test</SheetTitle>
+                <SheetTitle>Create Test Pattren</SheetTitle>
               </SheetHeader>
               <div className="grid grid-cols-12 gap-4 py-4">
+                <div className="col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-3">
+                  <Label htmlFor="ExamName">Exam Name</Label>
+                  <Input
+                    id="ExamName"
+                    placeholder="Enter Exam Name"
+                    type="text"
+                    name="name"
+                    value={mockTestCreate.name}
+                    onChange={singleInputHander}
+                  />
+                </div>
                 <div className="col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-3">
                   <Label htmlFor="howManySections">How Many Sections ?</Label>
                   <Input
                     id="howManySections"
                     type="number"
-                    name="no_of_sections"
-                    value={mockTestCreate.no_of_sections}
+                    min={1}
+                    max={10}
+                    name="no_sections"
+                    value={mockTestCreate.no_sections}
                     onChange={singleInputHander}
                   />
                 </div>
               </div>
               <>
                 {mockTestCreate.sections.map((data, i) => (
-                  <div className="p-2 border rounded-md my-1" key={uuidv4()}>
+                  <div
+                    className="p-3 border rounded-md my-2 shadow shadow-gray-200 dark:shadow-gray-800 "
+                    key={`section-${i}`}
+                  >
                     <h2>Section {i + 1}</h2>
-                    <div
-                      key={uuidv4()}
-                      className="grid grid-cols-12 gap-4 py-4"
-                    >
-                      <div
-                        key={uuidv4()}
-                        className="col-span-12 sm:col-span-6 md:col-span-4"
-                      >
-                        <Label key={uuidv4()} htmlFor="howManySections">
-                          Topic
-                        </Label>
+                    <div className="grid grid-cols-12 gap-4 py-4">
+                      <div className="col-span-12 sm:col-span-6 md:col-span-4">
+                        <Label htmlFor="howManySections">Topic</Label>
                         <Select
-                          key={uuidv4()}
                           onValueChange={(e) => onChangeValue(e, i)}
-                          defaultValue={data.topic}
+                          defaultValue={data.section_topic}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select Topic" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="1">Topic 1</SelectItem>
-                            <SelectItem value="2">Topic 2</SelectItem>
-                            <SelectItem value="3">Topic 3</SelectItem>
+                            {topicsList.length > 0 &&
+                              topicsList.map((topic) => (
+                                <SelectItem
+                                  key={`${topic?.name}-${topic.created_at}`}
+                                  value={topic.id}
+                                >
+                                  {topic?.name}
+                                </SelectItem>
+                              ))}
                           </SelectContent>
                         </Select>
                       </div>
-                      <div
-                        key={uuidv4()}
-                        className="col-span-12 sm:col-span-6 md:col-span-4"
-                      >
-                        <Label key={uuidv4()} htmlFor="howManySections">
-                          Duration
-                        </Label>
+                      <div className="col-span-12 sm:col-span-6 md:col-span-4">
+                        <Label htmlFor="howManySections">Duration</Label>
                         <Input
-                          key={uuidv4()}
-                          placeholder="Section Duration"
                           type="number"
-                          name="duration"
-                          onChange={(e) => sesstionsInputHandler(e, i)}
-                          value={data.duration}
+                          name="section_duration"
+                          placeholder="Duration in Minutes"
+                          value={data.section_duration}
+                          onChange={(e) => sessionInputHandler(e, i)}
                         />
                       </div>
-                      <div
-                        key={uuidv4()}
-                        className="col-span-12 sm:col-span-6 md:col-span-4"
-                      >
-                        <Label key={uuidv4()} htmlFor="howManySections">
+                      <div className="col-span-12 sm:col-span-6 md:col-span-4">
+                        <Label htmlFor="howManySections">
                           No : Of Questions
                         </Label>
                         <Input
-                          key={uuidv4()}
                           name="no_of_questions"
                           placeholder="No:Of Questions"
                           type="number"
                           value={data.no_of_questions}
-                          onChange={(e) => sesstionsInputHandler(e, i)}
+                          onChange={(e) => sessionInputHandler(e, i)}
                         />
                       </div>
                     </div>
@@ -311,16 +430,22 @@ const MockTest = () => {
                 ))}
               </>
               <SheetFooter>
-                <Button variant="default" onClick={createTest}>
-                  Create
-                </Button>
+                {!createButton.submit && (
+                  <Button variant="default" onClick={createTest}>
+                    Submit
+                  </Button>
+                )}
+                {createButton.submit && (
+                  <Button variant="ghost" disabled>
+                    {createButton.text}
+                  </Button>
+                )}
               </SheetFooter>
             </SheetContent>
           </Sheet>
         </div>
       </div>
-      {new Array(10).map((i,j)=>{return <h1>{j}{i}</h1>})}
-      <h1>1</h1>
+
       {!loading && data?.length > 0 && (
         <Card>
           <CardTitle className="flex justify-between items-center p-3">
@@ -335,9 +460,9 @@ const MockTest = () => {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[100px]">S.No</TableHead>
-                <TableHead className="text-center">Mode</TableHead>
-                <TableHead className="text-center">Type</TableHead>
-                <TableHead className="text-center">Question</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead className="text-center">No Of Sections</TableHead>
+                <TableHead className="text-center">Total Duration</TableHead>
                 <TableHead className="text-center">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -347,68 +472,29 @@ const MockTest = () => {
                   <TableCell className="font-medium">
                     {(paginationData.currentPage - 1) * data.length + i + 1}
                   </TableCell>
-                  <TableCell>
-                    <Badge
-                      className={`${res.q_mode === "Easy" ? "bg-green-500 hover:bg-green-600" : res?.q_mode === "Medium" ? "bg-orange-500 hover:bg-orange-600" : "bg-red-500 hover:bg-red-600"} `}
-                    >
-                      {res.q_mode}
-                    </Badge>
+                  <TableCell>{res.name}</TableCell>
+                  <TableCell className="text-center">
+                    {res.no_sections}
                   </TableCell>
-                  <TableCell>
-                    <Badge
-                      className={`${
-                        res.q_type === "Qtype1"
-                          ? "bg-sky-400 hover:bg-sky-500"
-                          : res?.q_type === "Qtype2"
-                            ? "bg-rose-400 hover:bg-rose-500"
-                            : res?.q_type === "Qtype3"
-                              ? "bg-cyan-400 hover:bg-cyan-500"
-                              : res?.q_type === "Qtype4"
-                                ? "bg-orange-400 hover:bg-orange-500"
-                                : res?.q_type === "Qtype5"
-                                  ? "bg-blue-400 hover:bg-blue-500"
-                                  : res?.q_type === "Qtype6"
-                                    ? "bg-indigo-400 hover:bg-indigo-500"
-                                    : "bg-violet-400 hover:bg-violet-500"
-                      }`}
-                    >
-                      {res.q_type}
-                    </Badge>
+                  <TableCell className="text-center">
+                    {`${Math.floor(res.total_duration / 60)} Hour${Math.floor(res.total_duration / 60) > 1 ? "s" : ""} and ${res.total_duration % 60} Minutes`}
                   </TableCell>
-                  <TableCell>
-                    <div
-                      dangerouslySetInnerHTML={{
-                        __html: res.question.includes("<img")
-                          ? res.question.replace(
-                              "quesimg/",
-                              "https://www.drrajus.com/gretest/quesimg/"
-                            )
-                          : `<p>${res.question}</p>`,
-                      }}
-                    ></div>
-                  </TableCell>
-                  <TableCell>
+                  <TableCell className="text-center">
                     <Badge
                       className="cursor-pointer mx-1"
                       variant="outline"
-                      title="Edit the Student Details"
-                      onClick={() => questionActions(res, "view")}
                     >
                       <IconEye size={18} />
                     </Badge>
                     <Badge
                       className="cursor-pointer mx-1"
                       variant="default"
-                      title="Edit the Student Details"
-                      onClick={() => questionActions(res, "edit")}
                     >
                       <IconEdit size={18} />
                     </Badge>
                     <Badge
                       className="cursor-pointer"
                       variant="destructive"
-                      title="Delete the Student Record"
-                      onClick={() => deleteQuestion(res.q_id)}
                     >
                       <IconTrash size={18} />
                     </Badge>

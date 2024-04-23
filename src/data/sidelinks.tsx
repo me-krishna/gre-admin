@@ -44,30 +44,18 @@ export const sidelinks: SideLink[] = [
     href: "/questions-factory",
     icon: <IconDeviceIpadQuestion size={18} />,
   },
-  // {
-  //   title: "Tests",
-  //   label: "",
-  //   href: "#",
-  //   icon: <IconNotebook size={18} />,
-  //   sub: [
-  //     {
-  //       title: "Test Types",
-  //       label: "",
-  //       href: "/tests/test-types",
-  //       icon: <IconFilePencil size={18} />,
-  //     },
-  //     {
-  //       title: "Questions",
-  //       label: "",
-  //       href: "/tests/questions",
-  //       icon: <IconPencilQuestion size={18} />,
-  //     },
-  //     {
-  //       title: "Results",
-  //       label: "",
-  //       href: "/tests/results",
-  //       icon: <IconEyeCheck size={18} />,
-  //     },
-  //   ],
-  // },
+  {
+    title: "Tests",
+    label: "",
+    href: "#",
+    icon: <IconNotebook size={18} />,
+    sub: [
+      {
+        title: "Test Patterns",
+        label: "",
+        href: "/tests/test-pattern",
+        icon: <IconFilePencil size={18} />,
+      }
+    ],
+  },
 ];
