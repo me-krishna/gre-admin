@@ -49,6 +49,12 @@ export const sidelinks: SideLink[] = [
         label: "",
         href: "/tests/test-pattern",
         icon: <IconFilePencil size={18} />,
+      },
+      {
+        title: "Create Test",
+        label: "",
+        href: "/tests/create-test",
+        icon: <IconPencilQuestion size={18} />,
       }
     ],
   },

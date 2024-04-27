@@ -46,6 +46,12 @@ const router = createBrowserRouter([
         }),
       },
       {
+        path: "/tests/create-test",
+        lazy: async () => ({
+          Component: (await import("./pages/exams/create-test")).default,
+        }),
+      },
+      {
         path: "questions-factory",
         lazy: async () => ({
           Component: (await import("./pages/questions_factory/QuestionFactory"))
