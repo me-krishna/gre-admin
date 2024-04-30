@@ -30,8 +30,10 @@ import api from "@/api/api";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { set } from "date-fns";
-import { get } from "http";
+import { IQuestionsConfig } from "./types";
+import QuestionConfig from "./__comps/create-questions/question-config";
+import OptionsList from "./__comps/create-questions/options-list";
+import AnswersList from "./__comps/create-questions/answers";
 
 interface ITestData {
   pattren: string;
@@ -42,29 +44,21 @@ interface ITestData {
 interface IQuestions {
   questions_config: IQuestionsConfig;
   question: string;
-  options: TOptions | TOptions[];
-  answer: TOptions | TOptions[];
+  passage: string;
+  nonBlanks: {
+    options: TOptions[];
+    answer: number[];
+  };
+  blanks: {
+    answer: TOptions[][];
+    options: TOptions[][];
+  };
 }
 
-type TOptions = string[];
+type TOptions = string;
 
 interface ISection {
   questions: IQuestions[];
-}
-
-interface IQuestionsConfig {
-  question_type: string;
-  isThisPassageHaveQuestion: "yes" | "no" | "";
-  no_of_options: number;
-  isThereBlanks: boolean;
-  no_of_blanks: number;
-  isThereHeaderInfo: boolean;
-  header_info: string;
-  isThereFooterInfo: boolean;
-  footer_info: string;
-  blank_options: {
-    no_of_options: number;
-  }[];
 }
 
 const CreateTest = () => {
@@ -85,15 +79,18 @@ const CreateTest = () => {
               header_info: "",
               isThereFooterInfo: false,
               footer_info: "",
-              blank_options: [
-                {
-                  no_of_options: 0,
-                },
-              ],
+              blank_options: 0,
             },
             question: "",
-            options: [],
-            answer: [],
+            passage: "",
+            nonBlanks: {
+              options: [],
+              answer: [],
+            },
+            blanks: {
+              answer: [],
+              options: [],
+            },
           },
         ],
       },
@@ -102,7 +99,7 @@ const CreateTest = () => {
 
   const [listOfExamsPattrens, setListOfExamsPattrens] = useState<any[]>([]);
   const [listOfSections, setListSections] = useState<any[]>([]);
-  const [listOfQuestiontypes, setListOfQuestiontypes] = useState<any[]>([]);
+
   const [testData, setTestData] = useState<ITestData>(_initalTestData);
 
   /* API Handlers */
@@ -142,36 +139,23 @@ const CreateTest = () => {
                 header_info: "",
                 isThereFooterInfo: false,
                 footer_info: "",
-                blank_options: [
-                  {
-                    no_of_options: 0,
-                  },
-                ],
+                blank_options: 0,
               },
               question: "",
-              options: [],
-              answer: [],
+              passage: "",
+              blanks: {
+                answer: [],
+                options: [],
+              },
+              nonBlanks: {
+                answer: [],
+                options: [],
+              },
             })),
           });
         });
         setTestData((prev) => ({ ...prev, sections: SectinsData }));
         setListSections(data.data);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const getQuestionTypes = async () => {
-    try {
-      const res = await api.get("/question-types", {
-        params: {
-          type: "active",
-        },
-      });
-      const { status, data } = res;
-      if (status === 200) {
-        setListOfQuestiontypes(data.data);
       }
     } catch (e) {
       console.error(e);
@@ -185,44 +169,50 @@ const CreateTest = () => {
     return testData?.sections[sectionIdx]?.questions[questionIdx];
   };
 
-  type TShowHideCases = "no_of_options" | "no_of_options_blocks";
+  type TShowHideCases = "question";
 
   const showHide = (
     sectionIndex: number,
     questionIndex: number,
     value: TShowHideCases
-  ) => {
+  ): boolean => {
     switch (value) {
-      case "no_of_options":
+      case "question":
         return (
+          getQuestionValues(sectionIndex, questionIndex).questions_config
+            .question_type === "type2" ||
           (getQuestionValues(sectionIndex, questionIndex).questions_config
             .question_type === "type1" &&
             getQuestionValues(sectionIndex, questionIndex).questions_config
-              .isThisPassageHaveQuestion === "yes") ||
-          (getQuestionValues(sectionIndex, questionIndex).questions_config
-            .question_type === "type2" &&
-            getQuestionValues(sectionIndex, questionIndex).questions_config
-              .isThereBlanks === false)
-        );
-      case "no_of_options_blocks":
-        return (
-          getQuestionValues(sectionIndex, questionIndex).questions_config
-            .isThereBlanks === true &&
-          getQuestionValues(sectionIndex, questionIndex).questions_config
-            .no_of_blanks > 0
+              .isThisPassageHaveQuestion === "yes")
         );
       default:
-        return "none";
+        return false;
     }
   };
 
   /* End of Utils */
 
   /* Input Handlers */
+  const setQuestionConfigs = (si: number, qi: number, key: any, val: any) => {
+    setTestData((prev) => ({
+      ...prev,
+      sections: prev.sections.map((section, secIndx) => ({
+        questions: section.questions.map((question, qIdx) =>
+          secIndx === si && qIdx === qi
+            ? {
+                ...question,
+                [key]: val,
+              }
+            : question
+        ),
+      })),
+    }));
+  };
 
-  const handleQuestionsSelect = (
+  const handleAnswerNonBlanksOptions = (
     value: any,
-    paramName: string,
+    optionIndex: number,
     sectionIndex: number,
     questionIndex: number
   ) => {
@@ -233,9 +223,11 @@ const CreateTest = () => {
           secIndx === sectionIndex && qIdx === questionIndex
             ? {
                 ...question,
-                questions_config: {
-                  ...question.questions_config,
-                  [paramName]: value,
+                nonBlanks: {
+                  ...question.nonBlanks,
+                  options: question.nonBlanks.options.map((option, oIdx) =>
+                    oIdx === optionIndex ? value : option
+                  ),
                 },
               }
             : question
@@ -252,27 +244,14 @@ const CreateTest = () => {
   const inputHandler = (e: ChangeEvent<HTMLInputElement>) => {
     setTestData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
+
   /* End Input Handlers  */
-
-  const getDataFromInps = (e: any) => {
-    console.log(e);
-  };
-
   const createQuestionSubmit = () => {
     console.log(testData);
-    let b =
-      (getQuestionValues(0, 0).questions_config.question_type === "type1" &&
-        getQuestionValues(0, 0).questions_config.isThisPassageHaveQuestion ===
-          "yes") ||
-      (getQuestionValues(0, 0).questions_config.question_type === "type2" &&
-        !getQuestionValues(0, 0).questions_config.isThereBlanks);
-    console.log(b);
-    // console.log(JSON.stringify(testData));
   };
 
   useEffect(() => {
     getExamsPattrens();
-    getQuestionTypes();
   }, []);
 
   return (
@@ -364,475 +343,183 @@ const CreateTest = () => {
                                     <AccordionContent>
                                       <div>
                                         {/* Question Configaration */}
-                                        <div className="bg-blue-50 rounded p-3 my-2">
-                                          <Label>Question Configuration </Label>
-                                          <div className="grid grid-cols-12 gap-2 bg-white p-3 rounded-md my-2">
-                                            <div className="my-3 col-span-12 sm:col-span-6 md:col-span-4">
-                                              <Label>Question Type</Label>
-                                              <Select
-                                                onValueChange={(e) =>
-                                                  handleQuestionsSelect(
-                                                    e,
-                                                    "question_type",
-                                                    sectionIdx,
-                                                    index
-                                                  )
-                                                }
-                                                defaultValue={
-                                                  getQuestionValues(
-                                                    sectionIdx,
-                                                    index
-                                                  )?.questions_config
-                                                    .question_type
-                                                }
-                                              >
-                                                <SelectTrigger>
-                                                  <SelectValue placeholder="Question Type" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                  {listOfQuestiontypes.map(
-                                                    (item) => (
-                                                      <SelectItem
-                                                        key={
-                                                          item.id +
-                                                          "question-type-list"
-                                                        }
-                                                        value={item.name}
-                                                      >
-                                                        {item.label}
-                                                      </SelectItem>
-                                                    )
-                                                  )}
-                                                </SelectContent>
-                                              </Select>
-                                            </div>
-                                            {getQuestionValues(
+                                        <QuestionConfig
+                                          propData={
+                                            getQuestionValues(sectionIdx, index)
+                                              .questions_config
+                                          }
+                                          sendData={(e) =>
+                                            setQuestionConfigs(
                                               sectionIdx,
-                                              index
-                                            ).questions_config.question_type ===
-                                              "type1" && (
-                                              <div className="my-3 col-span-12 sm:col-span-6 md:col-span-4">
-                                                <div>
-                                                  <Label>
-                                                    is this passage have
-                                                    question?
-                                                  </Label>
-                                                  <Select
-                                                    defaultValue={
-                                                      getQuestionValues(
-                                                        sectionIdx,
-                                                        index
-                                                      )?.questions_config
-                                                        .isThisPassageHaveQuestion
-                                                    }
-                                                    onValueChange={(e) =>
-                                                      handleQuestionsSelect(
-                                                        e,
-                                                        "isThisPassageHaveQuestion",
-                                                        sectionIdx,
-                                                        index
-                                                      )
-                                                    }
-                                                  >
-                                                    <SelectTrigger>
-                                                      <SelectValue placeholder="Choose..." />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                      <SelectItem value="yes">
-                                                        Yes
-                                                      </SelectItem>
-                                                      <SelectItem value="no">
-                                                        No
-                                                      </SelectItem>
-                                                    </SelectContent>
-                                                  </Select>
-                                                </div>
-                                              </div>
-                                            )}
-                                          </div>
-                                          <div className="grid grid-cols-12 gap-2  bg-white p-3 rounded-md my-2">
-                                            {getQuestionValues(
-                                              sectionIdx,
-                                              index
-                                            ).questions_config.question_type ===
-                                              "type2" && (
-                                              <div className="my-3 col-span-12 sm:col-span-6 lg:col-span-4">
-                                                <div className="flex items-center space-x-2 my-2">
-                                                  <Checkbox
-                                                    id="blanks"
-                                                    checked={
-                                                      getQuestionValues(
-                                                        sectionIdx,
-                                                        index
-                                                      )?.questions_config
-                                                        .isThereBlanks
-                                                    }
-                                                    onCheckedChange={(e) =>
-                                                      handleQuestionsSelect(
-                                                        e,
-                                                        "isThereBlanks",
-                                                        sectionIdx,
-                                                        index
-                                                      )
-                                                    }
-                                                  />
-                                                  <Label htmlFor="blanks">
-                                                    Select if there's a blanks
-                                                    in the question
-                                                  </Label>
-                                                </div>
+                                              index,
+                                              "questions_config",
+                                              e
+                                            )
+                                          }
+                                        />
 
-                                                {getQuestionValues(
+                                        {/* Passage */}
+                                        {getQuestionValues(sectionIdx, index)
+                                          .questions_config.question_type ===
+                                          "type1" && (
+                                          <div className="bg-amber-50 rounded p-3 my-2">
+                                            <Label>Passage</Label>
+                                            <Editor
+                                              filedName="passage"
+                                              id={
+                                                section.uuid +
+                                                "-passage-" +
+                                                index
+                                              }
+                                              data={
+                                                getQuestionValues(
                                                   sectionIdx,
                                                   index
-                                                ).questions_config
-                                                  .isThereBlanks && (
-                                                  <div className="bg-zinc-100 p-3 rounded-md my-2">
-                                                    <Label>
-                                                      How May Blanks ?
-                                                    </Label>
-                                                    <Input
-                                                      onChange={(e) =>
-                                                        handleQuestionsSelect(
-                                                          e.target.value,
-                                                          "no_of_blanks",
-                                                          sectionIdx,
-                                                          index
-                                                        )
-                                                      }
-                                                      value={
-                                                        getQuestionValues(
-                                                          sectionIdx,
-                                                          index
-                                                        )?.questions_config
-                                                          .no_of_blanks
-                                                      }
-                                                      type="number"
-                                                      min={1}
-                                                      max={3}
-                                                      placeholder="Enter No of Blanks"
-                                                    />
-                                                  </div>
-                                                )}
-                                              </div>
-                                            )}
-                                            <div className="my-3 col-span-12 sm:col-span-6 lg:col-span-4">
-                                              <div className="flex items-center space-x-2 my-2">
-                                                <Checkbox
-                                                  id="header-info"
-                                                  checked={
-                                                    getQuestionValues(
-                                                      sectionIdx,
-                                                      index
-                                                    )?.questions_config
-                                                      .isThereHeaderInfo
-                                                  }
-                                                  onCheckedChange={(e) =>
-                                                    handleQuestionsSelect(
-                                                      e,
-                                                      "isThereHeaderInfo",
-                                                      sectionIdx,
-                                                      index
-                                                    )
-                                                  }
-                                                />
-                                                <Label
-                                                  htmlFor="header-info"
-                                                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                                >
-                                                  Select if there's header info
-                                                </Label>
-                                              </div>
-                                              {getQuestionValues(
-                                                sectionIdx,
-                                                index
-                                              ).questions_config
-                                                .isThereHeaderInfo && (
-                                                <div className="bg-zinc-100 p-3 rounded-md my-2">
-                                                  <Label>Header Info</Label>
-                                                  <Input
-                                                    onChange={(e) =>
-                                                      handleQuestionsSelect(
-                                                        e.target.value,
-                                                        "header_info",
-                                                        sectionIdx,
-                                                        index
-                                                      )
-                                                    }
-                                                    value={
-                                                      getQuestionValues(
-                                                        sectionIdx,
-                                                        index
-                                                      )?.questions_config
-                                                        .header_info
-                                                    }
-                                                    type="text"
-                                                    maxLength={250}
-                                                    placeholder="Enter Header Info"
-                                                  />
-                                                </div>
-                                              )}
-                                            </div>
-                                            <div className="my-3 col-span-12 sm:col-span-6 lg:col-span-4">
-                                              <div className="flex items-center space-x-2 my-2">
-                                                <Checkbox
-                                                  id="footer"
-                                                  checked={
-                                                    getQuestionValues(
-                                                      sectionIdx,
-                                                      index
-                                                    )?.questions_config
-                                                      .isThereFooterInfo
-                                                  }
-                                                  onCheckedChange={(e) =>
-                                                    handleQuestionsSelect(
-                                                      e,
-                                                      "isThereFooterInfo",
-                                                      sectionIdx,
-                                                      index
-                                                    )
-                                                  }
-                                                />
-                                                <Label htmlFor="footer">
-                                                  Select if there's Footer info
-                                                </Label>
-                                              </div>
-                                              {getQuestionValues(
-                                                sectionIdx,
-                                                index
-                                              ).questions_config
-                                                .isThereFooterInfo && (
-                                                <div className="bg-zinc-100 p-3 rounded-md my-2">
-                                                  <Label>Footer Info</Label>
-                                                  <Input
-                                                    onChange={(e) =>
-                                                      handleQuestionsSelect(
-                                                        e.target.value,
-                                                        "footer_info",
-                                                        sectionIdx,
-                                                        index
-                                                      )
-                                                    }
-                                                    value={
-                                                      getQuestionValues(
-                                                        sectionIdx,
-                                                        index
-                                                      )?.questions_config
-                                                        .footer_info
-                                                    }
-                                                    type="text"
-                                                    maxLength={250}
-                                                    placeholder="Enter Footer Info"
-                                                  />
-                                                </div>
-                                              )}
-                                            </div>
+                                                ).passage
+                                              }
+                                              placeholder="Enter Passage Here..."
+                                              onChange={(value) =>
+                                                setQuestionConfigs(
+                                                  sectionIdx,
+                                                  index,
+                                                  "passage",
+                                                  value
+                                                )
+                                              }
+                                            />
                                           </div>
-                                          <div className="grid grid-cols-12 gap-2  bg-white p-3 rounded-md my-2">
-                                            {showHide(
-                                              sectionIdx,
-                                              index,
-                                              "no_of_options"
-                                            ) && (
-                                              <div className="my-3 col-span-12 sm:col-span-6 md:col-span-4">
-                                                <div>
-                                                  <Label>
-                                                    How many options does this
-                                                    question have?
-                                                  </Label>
-                                                  <Input
-                                                    onChange={(e) =>
-                                                      handleQuestionsSelect(
-                                                        e.target.value,
-                                                        "no_of_options",
-                                                        sectionIdx,
-                                                        index
-                                                      )
-                                                    }
-                                                    value={
-                                                      getQuestionValues(
-                                                        sectionIdx,
-                                                        index
-                                                      )?.questions_config
-                                                        .no_of_options
-                                                    }
-                                                    type="number"
-                                                    min={1}
-                                                    max={10}
-                                                    placeholder="Enter No of Options"
-                                                  />
-                                                </div>
-                                              </div>
-                                            )}
+                                        )}
 
-                                            {showHide(
-                                              sectionIdx,
-                                              index,
-                                              "no_of_options_blocks"
-                                            ) && (
-                                              <>
-                                                {[
-                                                  ...Array(
-                                                    Number(
-                                                      getQuestionValues(
-                                                        sectionIdx,
-                                                        index
-                                                      )?.questions_config
-                                                        .no_of_blanks
-                                                    )
-                                                  ),
-                                                ].map((_, i) => (
-                                                  <div
-                                                    className="my-3 col-span-12 sm:col-span-6 md:col-span-4"
-                                                    key={i + "block-options"}
-                                                  >
-                                                    <div>
-                                                      <Label>
-                                                        No of Options in Blocks{" "}
-                                                        {i + 1}
-                                                      </Label>
-                                                      <Input
-                                                        onChange={(e) =>
-                                                          handleQuestionsSelect(
-                                                            e.target.value,
-                                                            "no_of_options_blocks",
-                                                            sectionIdx,
-                                                            index
-                                                          )
-                                                        }
-                                                        value={
-                                                          getQuestionValues(
-                                                            sectionIdx,
-                                                            index
-                                                          )?.questions_config
-                                                            .no_of_options
-                                                        }
-                                                        type="number"
-                                                        min={1}
-                                                        max={10}
-                                                        placeholder="Enter No of Options Blocks"
-                                                      />
-                                                    </div>
-                                                  </div>
-                                                ))}
-                                              </>
-                                            )}
-                                          </div>
-                                        </div>
-                                        {/* Passage */}
-                                        <div className="bg-amber-50 rounded p-3 my-2">
-                                          <Label>Passage</Label>
-                                          <Editor
-                                            filedName="question"
-                                            id={
-                                              section.uuid +
-                                              "-question-" +
-                                              index
-                                            }
-                                            placeholder="Enter Question Here..."
-                                            onChange={(value) =>
-                                              console.log(value)
-                                            }
-                                          />
-                                        </div>
                                         {/* Question */}
-                                        <div className="bg-emerald-50 rounded p-3 my-2">
-                                          <Label>Question</Label>
-                                          <Editor
-                                            filedName="question"
-                                            id={
-                                              section.uuid +
-                                              "-question-" +
-                                              index
-                                            }
-                                            placeholder="Enter Question Here..."
-                                            onChange={(value) =>
-                                              console.log(value)
-                                            }
-                                          />
-                                        </div>
-                                        {/* Options */}
-                                        <div className="bg-indigo-50 rounded p-3 my-2">
-                                          <Label>Options</Label>
-                                          <Editor
-                                            filedName="question"
-                                            id={
-                                              section.uuid +
-                                              "-question-" +
-                                              index
-                                            }
-                                            placeholder="Enter Option 1 here"
-                                            onChange={(value) =>
-                                              console.log(value)
-                                            }
-                                          />
-                                          <Editor
-                                            filedName="question"
-                                            id={
-                                              section.uuid +
-                                              "-question-" +
-                                              index
-                                            }
-                                            placeholder="Enter Option 1 here"
-                                            onChange={(value) =>
-                                              console.log(value)
-                                            }
-                                          />
-                                          <Editor
-                                            filedName="question"
-                                            id={
-                                              section.uuid +
-                                              "-question-" +
-                                              index
-                                            }
-                                            placeholder="Enter Option 1 here"
-                                            onChange={(value) =>
-                                              console.log(value)
-                                            }
-                                          />
-                                        </div>
-                                        {/* Answers */}
-                                        <div className="bg-pink-50 rounded p-3 my-2">
-                                          <Label>Answers</Label>
-                                          <div className="flex justify-start gap-2">
-                                            <div className="flex justify-start items-center space-x-1">
-                                              <Checkbox id="answer-1" />
-                                              <label
-                                                htmlFor="answer-1"
-                                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                              >
-                                                1
-                                              </label>
-                                            </div>
-                                            <div className="flex justify-start items-center space-x-1">
-                                              <Checkbox id="answer-2" />
-                                              <label
-                                                htmlFor="answer-2"
-                                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                              >
-                                                2
-                                              </label>
-                                            </div>
-                                            <div className="flex justify-start items-center space-x-1">
-                                              <Checkbox id="answer-3" />
-                                              <label
-                                                htmlFor="answer-3"
-                                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                              >
-                                                3
-                                              </label>
-                                            </div>
-                                            <div className="flex justify-start items-center space-x-1">
-                                              <Checkbox id="answer-4" />
-                                              <label
-                                                htmlFor="answer-4"
-                                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                              >
-                                                4
-                                              </label>
-                                            </div>
+                                        {showHide(
+                                          sectionIdx,
+                                          index,
+                                          "question"
+                                        ) && (
+                                          <div className="bg-emerald-50 rounded p-3 my-2">
+                                            <Label>Question</Label>
+                                            <Editor
+                                              filedName="question"
+                                              id={
+                                                section.uuid +
+                                                "-question-" +
+                                                index
+                                              }
+                                              data={
+                                                getQuestionValues(
+                                                  sectionIdx,
+                                                  index
+                                                ).question
+                                              }
+                                              placeholder="Enter Question Here..."
+                                              onChange={(value) =>
+                                                setQuestionConfigs(
+                                                  sectionIdx,
+                                                  index,
+                                                  "question",
+                                                  value
+                                                )
+                                              }
+                                            />
                                           </div>
-                                        </div>
+                                        )}
+
+                                        {/* Options */}
+                                        {getQuestionValues(sectionIdx, index)
+                                          .questions_config.no_of_options >
+                                          0 && (
+                                          <div className="bg-indigo-50 rounded p-3 my-2">
+                                            <Label>Options</Label>
+                                            <OptionsList
+                                              noOfOptions={
+                                                getQuestionValues(
+                                                  sectionIdx,
+                                                  index
+                                                ).questions_config.no_of_options
+                                              }
+                                              getData={
+                                                getQuestionValues(
+                                                  sectionIdx,
+                                                  index
+                                                ).nonBlanks.options
+                                              }
+                                              sendData={(options) =>
+                                                setTestData((prev) => ({
+                                                  ...prev,
+                                                  sections: prev.sections.map(
+                                                    (section, secIndx) => ({
+                                                      questions:
+                                                        section.questions.map(
+                                                          (question, qIdx) =>
+                                                            secIndx ===
+                                                              sectionIdx &&
+                                                            qIdx === index
+                                                              ? {
+                                                                  ...question,
+                                                                  nonBlanks: {
+                                                                    ...question.nonBlanks,
+                                                                    options,
+                                                                  },
+                                                                }
+                                                              : question
+                                                        ),
+                                                    })
+                                                  ),
+                                                }))
+                                              }
+                                            />
+                                          </div>
+                                        )}
+
+                                        {/* Answers */}
+                                        {showHide(
+                                          sectionIdx,
+                                          index,
+                                          "question"
+                                        ) && (
+                                          <div className="bg-pink-50 rounded p-3 my-2">
+                                            <Label>Answers</Label>
+                                            <AnswersList
+                                              noOfOptions={
+                                                getQuestionValues(
+                                                  sectionIdx,
+                                                  index
+                                                ).questions_config.no_of_options
+                                              }
+                                              getData={
+                                                getQuestionValues(
+                                                  sectionIdx,
+                                                  index
+                                                ).nonBlanks.answer
+                                              }
+                                              sendData={(options) =>
+                                                setTestData((prev) => ({
+                                                  ...prev,
+                                                  sections: prev.sections.map(
+                                                    (section, secIndx) => ({
+                                                      questions:
+                                                        section.questions.map(
+                                                          (question, qIdx) =>
+                                                            secIndx ===
+                                                              sectionIdx &&
+                                                            qIdx === index
+                                                              ? {
+                                                                  ...question,
+                                                                  nonBlanks: {
+                                                                    ...question.nonBlanks,
+                                                                    answer:
+                                                                      options,
+                                                                  },
+                                                                }
+                                                              : question
+                                                        ),
+                                                    })
+                                                  ),
+                                                }))
+                                              }
+                                            />
+                                          </div>
+                                        )}
                                       </div>
                                     </AccordionContent>
                                   </AccordionItem>

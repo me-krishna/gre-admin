@@ -4,9 +4,10 @@ import { FC } from "react";
 
 interface EditorProps {
   filedName: string;
-  id: string;
+  id?: string;
   onChange: (data: string, filedName: string) => void;
   placeholder?: string;
+  data: string;
 }
 
 const Editor: FC<EditorProps> = ({
@@ -14,6 +15,7 @@ const Editor: FC<EditorProps> = ({
   filedName,
   onChange,
   placeholder = "Enter Here...",
+  data
 }) => {
   const toolBar = [
     "undo",
@@ -45,19 +47,19 @@ const Editor: FC<EditorProps> = ({
               (import.meta.env.VITE_API_URL as string) + "/single-upload",
           },
         }}
-        data=""
+        data={data}
         onReady={(editor) => {
           // You can store the "editor" and use when it is needed.
-          console.log("Editor is ready to use!", editor);
+          // console.log("Editor is ready to use!", editor);
         }}
         onChange={(event, editor) => {
           onChange(editor.getData(), filedName);
         }}
         onBlur={(event, editor) => {
-          console.log("Blur.", editor);
+          // console.log("Blur.", editor);
         }}
         onFocus={(event, editor) => {
-          console.log("Focus.", editor);
+          // console.log("Focus.", editor);
         }}
       />
     </div>
