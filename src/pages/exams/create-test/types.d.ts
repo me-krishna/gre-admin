@@ -11,3 +11,8 @@ export interface IQuestionsConfig {
   blank_options: number;
 }
 
+
+export interface INonBlankBlock {
+  options: string[];
+  answer: number[];
+}

@@ -29,11 +29,11 @@ import { ChangeEvent, useEffect, useState } from "react";
 import api from "@/api/api";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { IQuestionsConfig } from "./types";
+import { INonBlankBlock, IQuestionsConfig } from "./types";
 import QuestionConfig from "./__comps/create-questions/question-config";
 import OptionsList from "./__comps/create-questions/options-list";
 import AnswersList from "./__comps/create-questions/answers";
+import NonBlankBlock from "./__comps/create-questions/nonBlanks";
 
 interface ITestData {
   pattren: string;
@@ -45,10 +45,7 @@ interface IQuestions {
   questions_config: IQuestionsConfig;
   question: string;
   passage: string;
-  nonBlanks: {
-    options: TOptions[];
-    answer: number[];
-  };
+  nonBlanks: INonBlankBlock;
   blanks: {
     answer: TOptions[][];
     options: TOptions[][];
@@ -424,102 +421,92 @@ const CreateTest = () => {
                                           </div>
                                         )}
 
-                                        {/* Options */}
+                                        {/* Non Blanks */}
                                         {getQuestionValues(sectionIdx, index)
                                           .questions_config.no_of_options >
                                           0 && (
-                                          <div className="bg-indigo-50 rounded p-3 my-2">
-                                            <Label>Options</Label>
-                                            <OptionsList
-                                              noOfOptions={
-                                                getQuestionValues(
-                                                  sectionIdx,
-                                                  index
-                                                ).questions_config.no_of_options
-                                              }
-                                              getData={
-                                                getQuestionValues(
-                                                  sectionIdx,
-                                                  index
-                                                ).nonBlanks.options
-                                              }
-                                              sendData={(options) =>
-                                                setTestData((prev) => ({
-                                                  ...prev,
-                                                  sections: prev.sections.map(
-                                                    (section, secIndx) => ({
-                                                      questions:
-                                                        section.questions.map(
-                                                          (question, qIdx) =>
-                                                            secIndx ===
-                                                              sectionIdx &&
-                                                            qIdx === index
-                                                              ? {
-                                                                  ...question,
-                                                                  nonBlanks: {
-                                                                    ...question.nonBlanks,
-                                                                    options,
-                                                                  },
-                                                                }
-                                                              : question
-                                                        ),
-                                                    })
-                                                  ),
-                                                }))
-                                              }
-                                            />
-                                          </div>
+                                          <NonBlankBlock
+                                            noOfOptions={
+                                              getQuestionValues(
+                                                sectionIdx,
+                                                index
+                                              ).questions_config.no_of_options
+                                            }
+                                            getData={
+                                              getQuestionValues(
+                                                sectionIdx,
+                                                index
+                                              ).nonBlanks
+                                            }
+                                            sendData={(options) =>
+                                              setTestData((prev) => ({
+                                                ...prev,
+                                                sections: prev.sections.map(
+                                                  (section, secIndx) => ({
+                                                    questions:
+                                                      section.questions.map(
+                                                        (question, qIdx) =>
+                                                          secIndx ===
+                                                            sectionIdx &&
+                                                          qIdx === index
+                                                            ? {
+                                                                ...question,
+                                                                nonBlanks:
+                                                                  options,
+                                                              }
+                                                            : question
+                                                      ),
+                                                  })
+                                                ),
+                                              }))
+                                            }
+                                          />
+
+                                          // <div className="bg-indigo-50 rounded p-3 my-2">
+                                          //   <Label>Options</Label>
+                                          //   <OptionsList
+                                          //     noOfOptions={
+                                          //       getQuestionValues(
+                                          //         sectionIdx,
+                                          //         index
+                                          //       ).questions_config.no_of_options
+                                          //     }
+                                          //     getData={
+                                          //       getQuestionValues(
+                                          //         sectionIdx,
+                                          //         index
+                                          //       ).nonBlanks.options
+                                          //     }
+                                          //     sendData={(options) =>
+                                          //       setTestData((prev) => ({
+                                          //         ...prev,
+                                          //         sections: prev.sections.map(
+                                          //           (section, secIndx) => ({
+                                          //             questions:
+                                          //               section.questions.map(
+                                          //                 (question, qIdx) =>
+                                          //                   secIndx ===
+                                          //                     sectionIdx &&
+                                          //                   qIdx === index
+                                          //                     ? {
+                                          //                         ...question,
+                                          //                         nonBlanks: {
+                                          //                           ...question.nonBlanks,
+                                          //                           options,
+                                          //                         },
+                                          //                       }
+                                          //                     : question
+                                          //               ),
+                                          //           })
+                                          //         ),
+                                          //       }))
+                                          //     }
+                                          //   />
+                                          // </div>
                                         )}
 
-                                        {/* Answers */}
-                                        {showHide(
-                                          sectionIdx,
-                                          index,
-                                          "question"
-                                        ) && (
-                                          <div className="bg-pink-50 rounded p-3 my-2">
-                                            <Label>Answers</Label>
-                                            <AnswersList
-                                              noOfOptions={
-                                                getQuestionValues(
-                                                  sectionIdx,
-                                                  index
-                                                ).questions_config.no_of_options
-                                              }
-                                              getData={
-                                                getQuestionValues(
-                                                  sectionIdx,
-                                                  index
-                                                ).nonBlanks.answer
-                                              }
-                                              sendData={(options) =>
-                                                setTestData((prev) => ({
-                                                  ...prev,
-                                                  sections: prev.sections.map(
-                                                    (section, secIndx) => ({
-                                                      questions:
-                                                        section.questions.map(
-                                                          (question, qIdx) =>
-                                                            secIndx ===
-                                                              sectionIdx &&
-                                                            qIdx === index
-                                                              ? {
-                                                                  ...question,
-                                                                  nonBlanks: {
-                                                                    ...question.nonBlanks,
-                                                                    answer:
-                                                                      options,
-                                                                  },
-                                                                }
-                                                              : question
-                                                        ),
-                                                    })
-                                                  ),
-                                                }))
-                                              }
-                                            />
-                                          </div>
-                                        )}
+                                        {/* Blanks */}
+                                        
                                       </div>
                                     </AccordionContent>
                                   </AccordionItem>

@@ -210,9 +210,7 @@ const QuestionConfig: FC<QuestionConfigProps> = ({ propData, sendData }) => {
                     handleInputs(e.target.value, "no_of_options")
                   }
                   value={data.no_of_options}
-                  type="number"
-                  min={1}
-                  max={10}
+                  type="test"
                   placeholder="Enter No of Options"
                 />
               </div>
