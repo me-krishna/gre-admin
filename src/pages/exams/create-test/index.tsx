@@ -31,9 +31,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { INonBlankBlock, IQuestionsConfig } from "./types";
 import QuestionConfig from "./__comps/create-questions/question-config";
-import OptionsList from "./__comps/create-questions/options-list";
-import AnswersList from "./__comps/create-questions/answers";
 import NonBlankBlock from "./__comps/create-questions/nonBlanks";
+import BlanksBlock from "./__comps/create-questions/blanks";
 
 interface ITestData {
   pattren: string;
@@ -46,10 +45,7 @@ interface IQuestions {
   question: string;
   passage: string;
   nonBlanks: INonBlankBlock;
-  blanks: {
-    answer: TOptions[][];
-    options: TOptions[][];
-  };
+  blanks: INonBlankBlock[];
 }
 
 type TOptions = string;
@@ -76,7 +72,7 @@ const CreateTest = () => {
               header_info: "",
               isThereFooterInfo: false,
               footer_info: "",
-              blank_options: 0,
+              blank_options: [],
             },
             question: "",
             passage: "",
@@ -84,10 +80,7 @@ const CreateTest = () => {
               options: [],
               answer: [],
             },
-            blanks: {
-              answer: [],
-              options: [],
-            },
+            blanks: [],
           },
         ],
       },
@@ -136,18 +129,15 @@ const CreateTest = () => {
                 header_info: "",
                 isThereFooterInfo: false,
                 footer_info: "",
-                blank_options: 0,
+                blank_options: [],
               },
               question: "",
               passage: "",
-              blanks: {
-                answer: [],
-                options: [],
-              },
               nonBlanks: {
-                answer: [],
                 options: [],
+                answer: [],
               },
+              blanks: [],
             })),
           });
         });
@@ -506,7 +496,37 @@ const CreateTest = () => {
                                         )}
 
                                         {/* Blanks */}
-                                        
+                                        <BlanksBlock
+                                          blank_options={
+                                            getQuestionValues(sectionIdx, index)
+                                              .questions_config.blank_options
+                                          }
+                                          getData={
+                                            getQuestionValues(sectionIdx, index)
+                                              .blanks
+                                          }
+                                          sendData={(options) => {
+                                            setTestData((prev) => ({
+                                              ...prev,
+                                              sections: prev.sections.map(
+                                                (section, secIndx) => ({
+                                                  questions:
+                                                    section.questions.map(
+                                                      (question, qIdx) =>
+                                                        secIndx ===
+                                                          sectionIdx &&
+                                                        qIdx === index
+                                                          ? {
+                                                              ...question,
+                                                              blanks: options,
+                                                            }
+                                                          : question
+                                                    ),
+                                                })
+                                              ),
+                                            }));
+                                          }}
+                                        />
                                       </div>
                                     </AccordionContent>
                                   </AccordionItem>

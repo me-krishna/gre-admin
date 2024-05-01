@@ -18,7 +18,7 @@ interface QuestionConfigProps {
   sendData: (data: IQuestionsConfig) => void;
 }
 
-type TShowHide = "no_of_options_blocks" | "option-parent" | "no_of_options";
+type TShowHide = "no_of_options_blanks" | "option-parent" | "no_of_options";
 
 const QuestionConfig: FC<QuestionConfigProps> = ({ propData, sendData }) => {
   const [listOfQuestiontypes, setListOfQuestiontypes] = useState<any[]>([]);
@@ -26,13 +26,63 @@ const QuestionConfig: FC<QuestionConfigProps> = ({ propData, sendData }) => {
   const [data, setData] = useState<IQuestionsConfig>(propData);
 
   const handleInputs = (val: any, key: string) => {
+
+    if (key === "no_of_blanks") {
+      const blankOptions =
+        data.no_of_blanks > val
+          ? data.blank_options.slice(0, val)
+          : data.blank_options.concat(
+              Array.from({ length: val - data.no_of_blanks }, () => 0)
+            );
+      // Array.from({ length: val }, () => 0);
+      setData({
+        ...data,
+        [key]: val,
+        blank_options: blankOptions,
+      });
+      sendData({
+        ...data,
+        [key]: val,
+        blank_options: blankOptions,
+      });
+      return;
+    } 
+    if(key === "isThereBlanks" && val === false){
+      setData({
+        ...data,
+        [key]: val,
+        no_of_blanks: 0,
+        blank_options: [],
+      });
+      sendData({
+        ...data,
+        [key]: val,
+        no_of_blanks: 0,
+        blank_options: [],
+      });
+    }
+    else {
+      setData({
+        ...data,
+        [key]: val,
+      });
+      sendData({
+        ...data,
+        [key]: val,
+      });
+    }
+  };
+
+  const handleBlankOptions = (val: number, index: number) => {
+    const blankOptions = data.blank_options;
+    blankOptions[index] = val;
     setData({
       ...data,
-      [key]: val,
+      blank_options: blankOptions,
     });
     sendData({
       ...data,
-      [key]: val,
+      blank_options: blankOptions,
     });
   };
 
@@ -52,6 +102,27 @@ const QuestionConfig: FC<QuestionConfigProps> = ({ propData, sendData }) => {
     }
   };
 
+  const handleQuestionType = (e: string) => {
+    setData({
+      ...data,
+      question_type: e,
+      blank_options: [],
+      isThereBlanks: false,
+      no_of_blanks: 0,
+      isThisPassageHaveQuestion: "",
+      no_of_options: 0,
+    });
+    sendData({
+      ...data,
+      question_type: e,
+      blank_options: [],
+      isThereBlanks: false,
+      no_of_blanks: 0,
+      isThisPassageHaveQuestion: "",
+      no_of_options: 0,
+    });
+  };
+
   const showHide = (value: TShowHide): boolean => {
     switch (value) {
       case "no_of_options":
@@ -60,10 +131,10 @@ const QuestionConfig: FC<QuestionConfigProps> = ({ propData, sendData }) => {
             data.isThisPassageHaveQuestion === "yes") ||
           (data.question_type === "type2" && data.isThereBlanks === false)
         );
-      case "no_of_options_blocks":
+      case "no_of_options_blanks":
         return data.isThereBlanks === true && data.no_of_blanks > 0;
       case "option-parent":
-        return showHide("no_of_options") || showHide("no_of_options_blocks");
+        return showHide("no_of_options") || showHide("no_of_options_blanks");
       default:
         return false;
     }
@@ -80,7 +151,7 @@ const QuestionConfig: FC<QuestionConfigProps> = ({ propData, sendData }) => {
         <div className="my-3 col-span-12 sm:col-span-6 md:col-span-4">
           <Label>Question Type</Label>
           <Select
-            onValueChange={(e) => handleInputs(e, "question_type")}
+            onValueChange={(e) => handleQuestionType(e)}
             defaultValue={data.question_type}
           >
             <SelectTrigger>
@@ -140,9 +211,10 @@ const QuestionConfig: FC<QuestionConfigProps> = ({ propData, sendData }) => {
                 <Input
                   onChange={(e) => handleInputs(e.target.value, "no_of_blanks")}
                   value={data.no_of_blanks}
+                  onWheel={(e) => (e.target as HTMLInputElement)?.blur()}
                   type="number"
                   min={1}
-                  max={3}
+                  max={5}
                   placeholder="Enter No of Blanks"
                 />
               </div>
@@ -210,14 +282,17 @@ const QuestionConfig: FC<QuestionConfigProps> = ({ propData, sendData }) => {
                     handleInputs(e.target.value, "no_of_options")
                   }
                   value={data.no_of_options}
-                  type="test"
+                  onWheel={(e) => (e.target as HTMLInputElement)?.blur()}
+                  type="number"
+                  min={1}
+                  max={10}
                   placeholder="Enter No of Options"
                 />
               </div>
             </div>
           )}
 
-          {showHide("no_of_options_blocks") && (
+          {showHide("no_of_options_blanks") && (
             <>
               {[...Array(Number(data.no_of_blanks))].map((_, i) => (
                 <div
@@ -225,16 +300,17 @@ const QuestionConfig: FC<QuestionConfigProps> = ({ propData, sendData }) => {
                   key={i + "block-options"}
                 >
                   <div>
-                    <Label>No of Options in Blocks {i + 1}</Label>
+                    <Label>No of Options in Blanks {i + 1}</Label>
                     <Input
                       onChange={(e) =>
-                        handleInputs(e.target.value, "no_of_options_blocks")
+                        handleBlankOptions(Number(e.target.value), i)
                       }
-                      value={data.no_of_options}
+                      onWheel={(e) => (e.target as HTMLInputElement)?.blur()}
+                      value={data.blank_options[i]}
                       type="number"
                       min={1}
                       max={10}
-                      placeholder="Enter No of Options Blocks"
+                      placeholder="Enter No of Options in Blanks"
                     />
                   </div>
                 </div>
