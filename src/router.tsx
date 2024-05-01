@@ -40,9 +40,9 @@ const router = createBrowserRouter([
         }),
       },
       {
-        path: "/tests/create-test",
+        path: "/tests/test-factory",
         lazy: async () => ({
-          Component: (await import("./pages/exams/create-test")).default,
+          Component: (await import("./pages/exams/test-factory")).default,
         }),
       },
       {

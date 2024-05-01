@@ -26,7 +26,6 @@ const QuestionConfig: FC<QuestionConfigProps> = ({ propData, sendData }) => {
   const [data, setData] = useState<IQuestionsConfig>(propData);
 
   const handleInputs = (val: any, key: string) => {
-
     if (key === "no_of_blanks") {
       const blankOptions =
         data.no_of_blanks > val
@@ -46,8 +45,8 @@ const QuestionConfig: FC<QuestionConfigProps> = ({ propData, sendData }) => {
         blank_options: blankOptions,
       });
       return;
-    } 
-    if(key === "isThereBlanks" && val === false){
+    }
+    if (key === "isThereBlanks" && val === false) {
       setData({
         ...data,
         [key]: val,
@@ -60,8 +59,7 @@ const QuestionConfig: FC<QuestionConfigProps> = ({ propData, sendData }) => {
         no_of_blanks: 0,
         blank_options: [],
       });
-    }
-    else {
+    } else {
       setData({
         ...data,
         [key]: val,
@@ -166,6 +164,22 @@ const QuestionConfig: FC<QuestionConfigProps> = ({ propData, sendData }) => {
                   {item.label}
                 </SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="my-3 col-span-12 sm:col-span-6 md:col-span-4">
+          <Label>Question Mode</Label>
+          <Select
+            onValueChange={(e) => handleInputs(e , 'mode')}
+            defaultValue={data.mode}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Question Mode" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="easy">Easy</SelectItem>
+              <SelectItem value="medium">Medium</SelectItem>
+              <SelectItem value="hard">Hard</SelectItem>
             </SelectContent>
           </Select>
         </div>

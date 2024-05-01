@@ -33,6 +33,8 @@ import { INonBlankBlock, IQuestionsConfig } from "./types";
 import QuestionConfig from "./__comps/create-questions/question-config";
 import NonBlankBlock from "./__comps/create-questions/nonBlanks";
 import BlanksBlock from "./__comps/create-questions/blanks";
+import Swal from "sweetalert2";
+import { useToast } from "@/components/ui/use-toast";
 
 interface ITestData {
   pattren: string;
@@ -41,9 +43,11 @@ interface ITestData {
 }
 
 interface IQuestions {
+  section_uuid: string;
   questions_config: IQuestionsConfig;
   question: string;
   passage: string;
+  explination: string;
   nonBlanks: INonBlankBlock;
   blanks: INonBlankBlock[];
 }
@@ -62,8 +66,10 @@ const CreateTest = () => {
       {
         questions: [
           {
+            section_uuid: "",
             questions_config: {
               question_type: "",
+              mode: "",
               isThisPassageHaveQuestion: "",
               no_of_options: 0,
               isThereBlanks: false,
@@ -76,6 +82,7 @@ const CreateTest = () => {
             },
             question: "",
             passage: "",
+            explination: "",
             nonBlanks: {
               options: [],
               answer: [],
@@ -86,6 +93,8 @@ const CreateTest = () => {
       },
     ],
   };
+
+  const { toast } = useToast();
 
   const [listOfExamsPattrens, setListOfExamsPattrens] = useState<any[]>([]);
   const [listOfSections, setListSections] = useState<any[]>([]);
@@ -119,8 +128,10 @@ const CreateTest = () => {
         data.data.forEach((item: any) => {
           SectinsData.push({
             questions: [...Array(item.no_of_questions)].map((_) => ({
+              section_uuid: item.uuid,
               questions_config: {
                 question_type: "",
+                mode: "",
                 isThisPassageHaveQuestion: "",
                 no_of_options: 0,
                 isThereBlanks: false,
@@ -133,6 +144,7 @@ const CreateTest = () => {
               },
               question: "",
               passage: "",
+              explination: "",
               nonBlanks: {
                 options: [],
                 answer: [],
@@ -235,6 +247,35 @@ const CreateTest = () => {
   /* End Input Handlers  */
   const createQuestionSubmit = () => {
     console.log(testData);
+  };
+  const takeABreak = () => {
+    if (testData.pattren === "") {
+      toast({
+        variant: "destructive",
+        title: "Please select exam pattren!",
+      });
+    } else if (testData.testTitle === "") {
+      toast({
+        variant: "destructive",
+        title: "Please enter test title!",
+      });
+    } else {
+      Swal.fire({
+        title: "Are you sure you want to take a break?",
+        showDenyButton: true,
+        showCancelButton: true,
+        confirmButtonText: `Yes`,
+        denyButtonText: `No`,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.fire("Saved!", "", "success");
+        } else if (result.isDenied) {
+          Swal.fire("Changes are not saved", "", "info");
+        }
+      });
+    }
+    // if(confirm("Are you sure you want to take a break?")) {
+    // }
   };
 
   useEffect(() => {
@@ -411,6 +452,34 @@ const CreateTest = () => {
                                           </div>
                                         )}
 
+                                        {/* Explination */}
+                                        <div className="bg-orange-50 rounded p-3 my-2">
+                                          <Label>Explanation</Label>
+                                          <Editor
+                                            filedName="explination"
+                                            id={
+                                              section.uuid +
+                                              "-explination-" +
+                                              index
+                                            }
+                                            data={
+                                              getQuestionValues(
+                                                sectionIdx,
+                                                index
+                                              ).explination
+                                            }
+                                            placeholder="Enter Explination Here..."
+                                            onChange={(value) =>
+                                              setQuestionConfigs(
+                                                sectionIdx,
+                                                index,
+                                                "explination",
+                                                value
+                                              )
+                                            }
+                                          />
+                                        </div>
+
                                         {/* Non Blanks */}
                                         {getQuestionValues(sectionIdx, index)
                                           .questions_config.no_of_options >
@@ -541,6 +610,13 @@ const CreateTest = () => {
               </div>
               <SheetFooter>
                 <div className="flex justify-between items-center w-full p-3 space-x-2 text-sm font-medium text-center text-gray-500 bg-white border border-gray-200 rounded-lg shadow-sm dark:text-gray-400 sm:text-base dark:bg-gray-800 dark:border-gray-700 sm:p-4 sm:space-x-4 rtl:space-x-reverse">
+                  <Button
+                    variant="outline"
+                    className="border-orange-400"
+                    onClick={takeABreak}
+                  >
+                    Take a Break
+                  </Button>
                   <Button
                     variant="outline"
                     className="border-sky-400"
