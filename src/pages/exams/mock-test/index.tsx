@@ -44,12 +44,6 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import Swal from "sweetalert2";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@radix-ui/react-tooltip";
 import OToolTip from "@/components/custom/tooltop";
 
 type IAction = "view" | "edit";
