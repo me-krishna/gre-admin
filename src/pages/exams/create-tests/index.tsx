@@ -36,7 +36,8 @@ import Swal from "sweetalert2";
 import { useToast } from "@/components/ui/use-toast";
 import { INonBlankBlock, IQuestionsConfig } from "./types";
 import { Card, CardContent } from "@/components/ui/card";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import test from "node:test";
 
 interface ITestData {
   pattren: string;
@@ -97,10 +98,10 @@ const CreateTest = () => {
   };
 
   const { toast } = useToast();
-
+  const navigate = useNavigate();
   const [listOfExamsPattrens, setListOfExamsPattrens] = useState<any[]>([]);
   const [listOfSections, setListSections] = useState<any[]>([]);
-
+  const [formSubmit, setFormSubmit] = useState<boolean>(false);
   const [testData, setTestData] = useState<ITestData>(_initalTestData);
 
   /* API Handlers */
@@ -246,21 +247,171 @@ const CreateTest = () => {
     setTestData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  const formErroMsg = (msg: string) => {
+    toast({
+      variant: "destructive",
+      title: msg,
+    });
+    setFormSubmit(false);
+    return false;
+  };
+
   /* End Input Handlers  */
-  const createQuestionSubmit = () => {
-    console.log(testData);
+  const createQuestionSubmit = async () => {
+    setFormSubmit(true);
+    if (testData.pattren === "") {
+      formErroMsg("Please select exam pattren!");
+    } else if (testData.testTitle === "") {
+      formErroMsg("Please enter test title!");
+    } else {
+      for (let i = 0; i < testData.sections.length; i++) {
+        for (let j = 0; j < testData.sections[i].questions.length; j++) {
+          const locData = testData.sections[i].questions[j];
+          if (locData.questions_config.question_type === "") {
+            return formErroMsg(
+              `Please select question type for question ${j + 1} in section ${i + 1}`
+            );
+          } else if (locData.questions_config.mode === "") {
+            return formErroMsg(
+              `Please select question mode for question ${j + 1} in section ${i + 1}`
+            );
+          } else if (
+            locData.questions_config.question_type === "type1" &&
+            locData.questions_config.isThisPassageHaveQuestion === ""
+          ) {
+            return formErroMsg(
+              `Please select is this passage have question for question ${j + 1} in section ${i + 1}`
+            );
+          } else if (
+            locData.questions_config.question_type === "type2" &&
+            locData.questions_config.isThereBlanks === true &&
+            locData.questions_config.no_of_blanks === 0
+          ) {
+            return formErroMsg(
+              `Please enter number of blanks for question ${j + 1} in section ${i + 1}`
+            );
+          } else if (
+            locData.questions_config.no_of_blanks > 0 &&
+            locData.questions_config.blank_options.some((item) => item === 0)
+          ) {
+            return formErroMsg(
+              `Please enter no:of options there in the blanks options for question ${j + 1} in section ${i + 1}`
+            );
+          } else if (
+            locData.questions_config.isThereHeaderInfo === true &&
+            testData.sections[i].questions[
+              j
+            ].questions_config.header_info.trim().length < 1
+          ) {
+            return formErroMsg(
+              `Please enter header info for question ${j + 1} in section ${i + 1}`
+            );
+          } else if (
+            locData.questions_config.isThereFooterInfo === true &&
+            testData.sections[i].questions[
+              j
+            ].questions_config.footer_info.trim().length < 1
+          ) {
+            return formErroMsg(
+              `Please enter footer info for question ${j + 1} in section ${i + 1}`
+            );
+          } else if (
+            (locData.questions_config.isThisPassageHaveQuestion === "yes" &&
+              locData.questions_config.no_of_options === 0) ||
+            (locData.questions_config.question_type === "type2" &&
+              locData.questions_config.isThereBlanks === false &&
+              locData.questions_config.no_of_options === 0)
+          ) {
+            return formErroMsg(
+              `Please enter number of options for question ${j + 1} in section ${i + 1}`
+            );
+          } else if (
+            locData.questions_config.question_type === "type1" &&
+            locData.passage.trim().length === 0
+          ) {
+            return formErroMsg(
+              `Please enter passage for question ${j + 1} in section ${i + 1}`
+            );
+          } else if (
+            locData.questions_config.isThisPassageHaveQuestion !== "no" &&
+            locData.question === ""
+          ) {
+            return formErroMsg(
+              `Please enter question for question ${j + 1} in section ${i + 1}`
+            );
+          } else if (locData.explination === "") {
+            return formErroMsg(
+              `Please enter explination for question ${j + 1} in section ${
+                i + 1
+              }`
+            );
+          } else if (
+            ((locData.questions_config.question_type === "type1" &&
+              locData.questions_config.isThisPassageHaveQuestion === "yes") ||
+              (locData.questions_config.question_type === "type2" &&
+                locData.questions_config.isThereBlanks === false)) &&
+            locData.nonBlanks.options.some((item) => item.trim().length === 0)
+          ) {
+            return formErroMsg(
+              `Please enter all options for question ${j + 1} in section ${i + 1}`
+            );
+          } else if (
+            ((locData.questions_config.question_type === "type1" &&
+            locData.questions_config.isThisPassageHaveQuestion === "yes") || (
+            locData.questions_config.question_type === "type2" &&
+            locData.questions_config.isThereBlanks === false
+            ))&&
+            locData.nonBlanks.answer.length === 0
+          ) {
+            return formErroMsg(
+              `Please select answer for question ${j + 1} in section ${i + 1}`
+            );
+          } else if (
+            locData.questions_config.isThereBlanks === true &&
+            locData.blanks.every((item) =>
+              item.options.some((opt) => opt.length === 0)
+            )
+          ) {
+            return formErroMsg(
+              `Please enter all blanks options for question ${j + 1} in section ${i + 1}`
+            );
+          } else if (
+            locData.questions_config.isThereBlanks === true &&
+            locData.blanks.some((item) => item.answer.length === 0)
+          ) {
+            return formErroMsg(
+              `Please select atleast 1 answer in each blank options for question ${j + 1} in section ${i + 1}`
+            );
+          }
+        }
+      }
+      {
+        const payload = {
+          ...testData,
+          status: 1,
+        };
+        try {
+          const a = await api.post("/mock-test", payload);
+          const { status } = a;
+          if (status === 201) {
+            Swal.fire("Practice Test Submited!", "", "success").then(() => {
+              navigate("/tests/test-factory");
+            });
+          }
+        } catch (e) {
+          console.error(e);
+          Swal.fire("Something went wrong!", "", "error");
+          setFormSubmit(false);
+        }
+      }
+    }
   };
   const takeABreak = () => {
+    setFormSubmit(true);
     if (testData.pattren === "") {
-      toast({
-        variant: "destructive",
-        title: "Please select exam pattren!",
-      });
+      formErroMsg("Please select exam pattren!");
     } else if (testData.testTitle === "") {
-      toast({
-        variant: "destructive",
-        title: "Please enter test title!",
-      });
+      formErroMsg("Please enter test title!");
     } else {
       Swal.fire({
         title: "Are you sure you want to take a break?",
@@ -270,14 +421,30 @@ const CreateTest = () => {
         denyButtonText: `No`,
       }).then((result) => {
         if (result.isConfirmed) {
-          Swal.fire("Saved!", "", "success");
+          (async () => {
+            try {
+              const payload = {
+                ...testData,
+                status: 2,
+              };
+              const a = await api.post("/mock-test", payload);
+              const { status } = a;
+              if (status === 201) {
+                Swal.fire("Test Saved to DB!", "", "success").then(() => {});
+                navigate("/tests/test-factory");
+              }
+            } catch (e) {
+              console.error(e);
+              Swal.fire("Something went wrong!", "", "error");
+              setFormSubmit(false);
+            }
+          })();
         } else if (result.isDenied) {
           Swal.fire("Changes are not saved", "", "info");
+          setFormSubmit(false);
         }
       });
     }
-    // if(confirm("Are you sure you want to take a break?")) {
-    // }
   };
 
   useEffect(() => {
@@ -541,20 +708,31 @@ const CreateTest = () => {
               )}
 
             <div className="mt-3 flex justify-between items-center w-full p-3 space-x-2 text-sm font-medium text-center text-gray-500 bg-white border border-gray-200 rounded-lg shadow-sm dark:text-gray-400 sm:text-base dark:bg-gray-800 dark:border-gray-700 sm:p-4 sm:space-x-4 rtl:space-x-reverse">
-              <Button
-                variant="outline"
-                className="border-orange-400"
-                onClick={takeABreak}
-              >
-                Take a Break
-              </Button>
-              <Button
-                variant="outline"
-                className="border-sky-400"
-                onClick={createQuestionSubmit}
-              >
-                Submit
-              </Button>
+              {!formSubmit && (
+                <>
+                  <Button
+                    disabled={formSubmit}
+                    variant="outline"
+                    className="border-orange-400"
+                    onClick={takeABreak}
+                  >
+                    Take a Break
+                  </Button>
+                  <Button
+                    disabled={formSubmit}
+                    variant="outline"
+                    className="border-sky-400"
+                    onClick={createQuestionSubmit}
+                  >
+                    Submit
+                  </Button>
+                </>
+              )}
+              {formSubmit && (
+                <Button variant="outline" className="border-sky-400">
+                  loading...
+                </Button>
+              )}
             </div>
           </div>
         </CardContent>
