@@ -34,6 +34,12 @@ const router = createBrowserRouter([
         }),
       },
       {
+        path: "student/create",
+        lazy: async () => ({
+          Component: (await import("./pages/students/create-student")).default,
+        }),
+      },
+      {
         path: "tests/test-pattern",
         lazy: async () => ({
           Component: (await import("./pages/exams/mock-test")).default,

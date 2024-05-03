@@ -96,19 +96,6 @@ const QuestionFactory = () => {
         <div className="flex justify-end gap-2 items-center">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline">
-                Create <IconPlus size={14} />
-              </Button>
-            </SheetTrigger>
-            <SheetContent className="w-[80%] sm:max-w-[940px]">
-              <SheetHeader>
-                <SheetTitle>Create Question</SheetTitle>
-              </SheetHeader>
-              <div className="grid gap-4 py-4">Test</div>
-            </SheetContent>
-          </Sheet>
-          <Sheet>
-            <SheetTrigger asChild>
               <Button ref={actionBtnRef} variant="outline" className="hidden">
                 View Data
               </Button>
@@ -139,7 +126,6 @@ const QuestionFactory = () => {
               <TableRow>
                 <TableHead className="w-[100px]">S.No</TableHead>
                 <TableHead className="text-center">Mode</TableHead>
-                <TableHead className="text-center">Type</TableHead>
                 <TableHead className="text-center">Question</TableHead>
                 <TableHead className="text-center">Actions</TableHead>
               </TableRow>
@@ -157,27 +143,7 @@ const QuestionFactory = () => {
                       {res.q_mode}
                     </Badge>
                   </TableCell>
-                  <TableCell>
-                    <Badge
-                      className={`${
-                        res.q_type === "Qtype1"
-                          ? "bg-sky-400 hover:bg-sky-500"
-                          : res?.q_type === "Qtype2"
-                            ? "bg-rose-400 hover:bg-rose-500"
-                            : res?.q_type === "Qtype3"
-                              ? "bg-cyan-400 hover:bg-cyan-500"
-                              : res?.q_type === "Qtype4"
-                                ? "bg-orange-400 hover:bg-orange-500"
-                                : res?.q_type === "Qtype5"
-                                  ? "bg-blue-400 hover:bg-blue-500"
-                                  : res?.q_type === "Qtype6"
-                                    ? "bg-indigo-400 hover:bg-indigo-500"
-                                    : "bg-violet-400 hover:bg-violet-500"
-                      }`}
-                    >
-                      {res.q_type}
-                    </Badge>
-                  </TableCell>
+
                   <TableCell>
                     <div
                       dangerouslySetInnerHTML={{
@@ -190,31 +156,21 @@ const QuestionFactory = () => {
                       }}
                     ></div>
                   </TableCell>
-                  <TableCell>
-                    <Badge
-                      className="cursor-pointer mx-1"
+                  <TableCell className="inline-flex gap-1">
+                    <Button
                       variant="outline"
-                      title="Edit the Student Details"
                       onClick={() => questionActions(res, "view")}
+                      size={"sm"}
                     >
                       <IconEye size={18} />
-                    </Badge>
-                    <Badge
-                      className="cursor-pointer mx-1"
+                    </Button>
+                    <Button
                       variant="default"
-                      title="Edit the Student Details"
                       onClick={() => questionActions(res, "edit")}
+                      size={"sm"}
                     >
                       <IconEdit size={18} />
-                    </Badge>
-                    <Badge
-                      className="cursor-pointer"
-                      variant="destructive"
-                      title="Delete the Student Record"
-                      onClick={() => deleteQuestion(res.q_id)}
-                    >
-                      <IconTrash size={18} />
-                    </Badge>
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
