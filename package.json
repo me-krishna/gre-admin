@@ -1,8 +1,9 @@
 {
-  "name": "miles-talent-hub",
+  "name": "dr-rajus-admin-pannel",
   "private": true,
   "version": "1.0.3",
   "type": "module",
+  "author": "PB Krishna Reddy",
   "scripts": {
     "dev": "vite --port 9002",
     "build": "tsc && vite build",
