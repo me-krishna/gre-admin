@@ -52,6 +52,12 @@ const router = createBrowserRouter([
         }),
       },
       {
+        path: "tests/update-test/:testId",
+        lazy: async () => ({
+          Component: (await import("./pages/exams/update-tests")).default,
+        }),
+      },
+      {
         path: "questions-factory",
         lazy: async () => ({
           Component: (await import("./pages/questions_factory/QuestionFactory"))
@@ -72,14 +78,3 @@ const router = createBrowserRouter([
 ]);
 
 export default router;
-
-// {
-//   index: true,
-//   loader: async () => redirect("/reports/1"),
-// },
-// {
-//   path: "reports/:id",
-//   lazy: async () => ({
-//     Component: (await import("./pages/reports")).default,
-//   }),
-// },

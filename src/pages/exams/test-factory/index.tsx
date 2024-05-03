@@ -153,16 +153,11 @@ const TestFactory = () => {
                     >
                       <IconEye size={18} />
                     </Button>
-                    <Button
-                      variant="default"
-                      size={"sm"}
-                      className="mx-1"
-                      onClick={() => {
-                        console.log("Edit Clicked");
-                      }}
-                    >
-                      <IconEdit size={18} />
-                    </Button>
+                    <Link to={`/tests/update-test/${res.uuid}`}>
+                      <Button variant="default" size={"sm"} className="mx-1">
+                        <IconEdit size={18} />
+                      </Button>
+                    </Link>
                     <Button
                       className="mx-1"
                       variant="destructive"
