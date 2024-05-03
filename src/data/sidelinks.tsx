@@ -2,9 +2,7 @@ import {
   IconLayoutDashboard,
   IconUsersGroup,
   IconFilePencil,
-  IconEyeCheck,
   IconPencilQuestion,
-  IconNotebook,
   IconDeviceIpadQuestion,
 } from "@tabler/icons-react";
 
@@ -39,23 +37,35 @@ export const sidelinks: SideLink[] = [
     icon: <IconDeviceIpadQuestion size={18} />,
   },
   {
-    title: "Tests",
+    title: "Test Patterns",
     label: "",
-    href: "#",
-    icon: <IconNotebook size={18} />,
-    sub: [
-      {
-        title: "Test Patterns",
-        label: "",
-        href: "/tests/test-pattern",
-        icon: <IconFilePencil size={18} />,
-      },
-      {
-        title: "Tests Factory",
-        label: "",
-        href: "/tests/test-factory",
-        icon: <IconPencilQuestion size={18} />,
-      },
-    ],
+    href: "/tests/test-pattern",
+    icon: <IconFilePencil size={18} />,
   },
+  {
+    title: "Tests Factory",
+    label: "",
+    href: "/tests/test-factory",
+    icon: <IconPencilQuestion size={18} />,
+  },
+  // {
+  //   title: "Tests",
+  //   label: "",
+  //   href: "#",
+  //   icon: <IconNotebook size={18} />,
+  //   sub: [
+  //     {
+  //       title: "Test Patterns",
+  //       label: "",
+  //       href: "/tests/test-pattern",
+  //       icon: <IconFilePencil size={18} />,
+  //     },
+  //     {
+  //       title: "Tests Factory",
+  //       label: "",
+  //       href: "/tests/test-factory",
+  //       icon: <IconPencilQuestion size={18} />,
+  //     },
+  //   ],
+  // },
 ];

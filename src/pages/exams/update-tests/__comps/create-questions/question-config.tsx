@@ -154,7 +154,7 @@ const QuestionConfig: FC<QuestionConfigProps> = ({
 
   return (
     <div className="bg-blue-50 rounded p-3 my-2 relative">
-      <div className="absolute top-0 right-0 w-full h-full z-50 bg-black bg-opacity-10 rounded-lg"></div>
+    {status!==2 &&  <div className="absolute top-0 right-0 w-full h-full z-50 bg-black bg-opacity-10 rounded-lg"></div> }
       <Label>Question Configuration </Label>
       <div className="grid grid-cols-12 gap-2 bg-white p-3 rounded-md my-2">
         <div className="my-3 col-span-12 sm:col-span-6 md:col-span-4">

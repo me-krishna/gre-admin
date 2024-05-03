@@ -25,6 +25,7 @@ import {
 } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import Swal from "sweetalert2";
 import { v4 } from "uuid";
 const TestFactory = () => {
   const [data, setData] = useState<any[]>([]);
@@ -72,6 +73,33 @@ const TestFactory = () => {
       setLoading(false);
     }
   };
+
+  const deleteTest = async (uuid: string) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You will not be able to recover this test!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it!",
+      confirmButtonColor: "#dc3545",
+      cancelButtonColor: "#6c757d",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const res = await api.post(`/delete-test`, { uuid });
+          const { status } = res;
+          if (status === 200) {
+            Swal.fire("Deleted!", "Test has been deleted.", "success");
+            getDataFromDb();
+          }
+        } catch (e) {
+          console.error(e);
+          Swal.fire("Error!", "Something went wrong", "error");
+        }
+      }
+    });
+  };
+
   useEffect(() => {
     getDataFromDb();
   }, [paginationData.currentPage]);
@@ -127,32 +155,32 @@ const TestFactory = () => {
                   </TableCell>
                   <TableCell className="text-center">
                     {res?.status === 0 && (
-                      <span className="py-1  shadow px-3 rounded-full text-[12px] inline-flex gap-2 text-red-600 bg-red-200">
-                        In Active <IconX size={18} />
+                      <span className="px-[5px] py-[2px] rounded-full text-[10px] font-semibold inline-flex items-center gap-1 text-red-600 bg-red-200">
+                        In Active <IconX size={12} />
                       </span>
                     )}
 
                     {res?.status === 1 && (
-                      <span className="py-1  shadow px-3 rounded-full text-[12px] inline-flex gap-2 text-green-600 bg-green-200">
-                        Active <IconCircleCheck size={18} />
+                      <span className="px-[5px] py-[2px] rounded-full text-[10px] font-semibold inline-flex items-center gap-1 text-green-600 bg-green-200">
+                        Active <IconCircleCheck size={12} />
                       </span>
                     )}
 
                     {res?.status === 2 && (
-                      <span className="py-1  shadow px-3 rounded-full text-[12px] inline-flex gap-2 text-orange-400 bg-orange-200">
-                        In Progress <IconProgress size={18} />
+                      <span className="px-[5px] py-[2px] rounded-full text-[10px] font-semibold inline-flex items-center gap-1 text-orange-400 bg-orange-200">
+                        In Progress <IconProgress size={12} />
                       </span>
                     )}
                   </TableCell>
                   <TableCell className="text-center">
-                    <Button
+                    {/* <Button
                       variant="outline"
                       size={"sm"}
                       className="mx-1"
                       onClick={() => console.log("View Clicked")}
                     >
                       <IconEye size={18} />
-                    </Button>
+                    </Button> */}
                     <Link to={`/tests/update-test/${res.uuid}`}>
                       <Button variant="default" size={"sm"} className="mx-1">
                         <IconEdit size={18} />
@@ -162,7 +190,7 @@ const TestFactory = () => {
                       className="mx-1"
                       variant="destructive"
                       size={"sm"}
-                      onClick={() => console.log("Delete Clicked")}
+                      onClick={() => deleteTest(res.uuid)}
                     >
                       <IconTrash size={18} />
                     </Button>

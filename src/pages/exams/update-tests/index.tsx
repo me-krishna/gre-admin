@@ -30,6 +30,7 @@ import { INonBlankBlock, IQuestionsConfig } from "./types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Alert } from "@/components/ui/alert";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface ITestData {
   pattren: string;
@@ -55,7 +56,7 @@ interface ISection {
   questions: IQuestions[];
 }
 
-const CreateTest = () => {
+const UpdateTests = () => {
   const _initalTestData: ITestData = {
     testTitle: "",
     pattren: "",
@@ -92,6 +93,7 @@ const CreateTest = () => {
   };
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [examStatus, setExamStatus] = useState<number>();
   const [loading, setLoading] = useState<boolean>(true);
   const [listOfExamsPattrens, setListOfExamsPattrens] = useState<any[]>([]);
   const [listOfSections, setListSections] = useState<any[]>([]);
@@ -156,9 +158,7 @@ const CreateTest = () => {
         return false;
     }
   };
-
   /* End of Utils */
-
   /* Input Handlers */
   const setQuestionConfigs = (si: number, qi: number, key: any, val: any) => {
     setTestData((prev) => ({
@@ -175,42 +175,13 @@ const CreateTest = () => {
       })),
     }));
   };
-
-  const handleAnswerNonBlanksOptions = (
-    value: any,
-    optionIndex: number,
-    sectionIndex: number,
-    questionIndex: number
-  ) => {
-    setTestData((prev) => ({
-      ...prev,
-      sections: prev.sections.map((section, secIndx) => ({
-        questions: section.questions.map((question, qIdx) =>
-          secIndx === sectionIndex && qIdx === questionIndex
-            ? {
-                ...question,
-                nonBlanks: {
-                  ...question.nonBlanks,
-                  options: question.nonBlanks.options.map((option, oIdx) =>
-                    oIdx === optionIndex ? value : option
-                  ),
-                },
-              }
-            : question
-        ),
-      })),
-    }));
-  };
-
   const handleSlectValue = (value: string) => {
     getSectionsData(Number(value));
     setTestData((prev) => ({ ...prev, pattren: value }));
   };
-
   const inputHandler = (e: ChangeEvent<HTMLInputElement>) => {
     setTestData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
-
   const formErroMsg = (msg: string) => {
     toast({
       variant: "destructive",
@@ -219,7 +190,6 @@ const CreateTest = () => {
     setFormSubmit(false);
     return false;
   };
-
   const getDataFromTestsScreens = async () => {
     try {
       const res = await api.post("/getTestByUuid", {
@@ -229,13 +199,13 @@ const CreateTest = () => {
       if (status === 200) {
         getSectionsData(Number(data.data.pattren));
         setTestData(data.data);
+        setExamStatus(data.data.status);
         setLoading(false);
       }
     } catch (e) {
       console.error(e);
     }
   };
-
   /* End Input Handlers  */
   const createQuestionSubmit = async () => {
     setFormSubmit(true);
@@ -367,13 +337,13 @@ const CreateTest = () => {
       {
         const payload = {
           ...testData,
-          status: 1,
+          status: examStatus === 2 ? 1 : examStatus,
         };
         try {
-          const a = await api.post("/mock-test", payload);
+          const a = await api.put(`/mock-test/${testId}`, payload);
           const { status } = a;
           if (status === 201) {
-            Swal.fire("Practice Test Submited!", "", "success").then(() => {
+            Swal.fire("Practice Test Updated!", "", "success").then(() => {
               navigate("/tests/test-factory");
             });
           }
@@ -406,7 +376,7 @@ const CreateTest = () => {
                 ...testData,
                 status: 2,
               };
-              const a = await api.post("/mock-test", payload);
+              const a = await api.put(`/mock-test/${testId}`, payload);
               const { status } = a;
               if (status === 201) {
                 Swal.fire("Test Saved to DB!", "", "success").then(() => {});
@@ -447,24 +417,72 @@ const CreateTest = () => {
         <Card>
           <CardContent>
             <div className="p-4">
+              {testData?.status !== undefined && testData?.status !== 2 && (
+                <div className="border p-3 rounded-lg">
+                  <Label>Test Status</Label>
+                  <RadioGroup
+                    onValueChange={(value) => setExamStatus(Number(value))}
+                    defaultValue={testData?.status?.toString()}
+                    className="flex gap-2 mt-2"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem
+                        value="1"
+                        id="option-active"
+                        className="text-green-700"
+                      />
+                      <Label htmlFor="option-active" className="text-green-700">
+                        Active
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem
+                        value="0"
+                        id="option-inActive"
+                        className="text-red-700"
+                      />
+                      <Label htmlFor="option-inActive" className="text-red-700">
+                        In Active
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+              )}
               <div className="my-3 flex gap-2">
                 <div>
                   <Label>Exam Pattren</Label>
-                  <Select
-                    onValueChange={handleSlectValue}
-                    defaultValue={testData?.pattren}
-                  >
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Exam Pattren" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {listOfExamsPattrens.map((item) => (
-                        <SelectItem key={item.uuid} value={item.id}>
-                          {item.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {testData?.status === 2 && (
+                    <Select
+                      onValueChange={handleSlectValue}
+                      defaultValue={testData?.pattren}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Exam Pattren" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {listOfExamsPattrens.map((item) => (
+                          <SelectItem key={item.uuid} value={item.id}>
+                            {item.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                  {testData?.status !== 2 && (
+                    <>
+                      <p className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
+                        {
+                          listOfExamsPattrens.filter(
+                            (res) => res.id === testData?.pattren
+                          )[0]?.name
+                        }
+                      </p>
+                      <div className="text-xs text-gray-500">
+                        Note: You can't change the exam pattren after submitting
+                        the test.
+                      </div>
+                    </>
+                  )}
                 </div>
                 <div>
                   <Label>Test Title</Label>
@@ -700,7 +718,7 @@ const CreateTest = () => {
                   </div>
                 )}
 
-              <div className="mt-3 flex justify-between items-center w-full p-3 space-x-2 text-sm font-medium text-center text-gray-500 bg-white border border-gray-200 rounded-lg shadow-sm dark:text-gray-400 sm:text-base dark:bg-gray-800 dark:border-gray-700 sm:p-4 sm:space-x-4 rtl:space-x-reverse">
+              <div className="mt-3 flex justify-end gap-2 items-center w-full p-3 space-x-2 text-sm font-medium text-center text-gray-500 bg-white border border-gray-200 rounded-lg shadow-sm dark:text-gray-400 sm:text-base dark:bg-gray-800 dark:border-gray-700 sm:p-4 sm:space-x-4 rtl:space-x-reverse">
                 {!formSubmit && (
                   <>
                     {testData?.status !== 1 && (
@@ -720,7 +738,7 @@ const CreateTest = () => {
                       className="border-sky-400"
                       onClick={createQuestionSubmit}
                     >
-                      Submit
+                      Update
                     </Button>
                   </>
                 )}
@@ -739,4 +757,4 @@ const CreateTest = () => {
   );
 };
 
-export default CreateTest;
+export default UpdateTests;
