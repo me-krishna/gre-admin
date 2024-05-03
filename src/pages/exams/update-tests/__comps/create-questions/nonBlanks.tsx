@@ -17,7 +17,6 @@ const NonBlankBlock: FC<NonBlankBlockProps> = ({
 }) => {
   const [answers, setAnswers] = useState<number[]>(getData.answer);
   const [options, setOptions] = useState<string[]>(getData.options);
-
   return (
     <div>
       <div className="bg-indigo-50 rounded p-3 my-2">

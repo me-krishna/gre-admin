@@ -16,11 +16,16 @@ import { Input } from "@/components/ui/input";
 interface QuestionConfigProps {
   propData: IQuestionsConfig;
   sendData: (data: IQuestionsConfig) => void;
+  status?: number;
 }
 
 type TShowHide = "no_of_options_blanks" | "option-parent" | "no_of_options";
 
-const QuestionConfig: FC<QuestionConfigProps> = ({ propData, sendData }) => {
+const QuestionConfig: FC<QuestionConfigProps> = ({
+  propData,
+  sendData,
+  status,
+}) => {
   const [listOfQuestiontypes, setListOfQuestiontypes] = useState<any[]>([]);
 
   const [data, setData] = useState<IQuestionsConfig>(propData);
@@ -39,11 +44,12 @@ const QuestionConfig: FC<QuestionConfigProps> = ({ propData, sendData }) => {
         [key]: val,
         blank_options: blankOptions,
       });
-      sendData({
-        ...data,
-        [key]: val,
-        blank_options: blankOptions,
-      });
+      status !== 2 &&
+        sendData({
+          ...data,
+          [key]: val,
+          blank_options: blankOptions,
+        });
       return;
     }
     if (key === "isThereBlanks" && val === false) {
@@ -53,21 +59,23 @@ const QuestionConfig: FC<QuestionConfigProps> = ({ propData, sendData }) => {
         no_of_blanks: 0,
         blank_options: [],
       });
-      sendData({
-        ...data,
-        [key]: val,
-        no_of_blanks: 0,
-        blank_options: [],
-      });
+      status !== 2 &&
+        sendData({
+          ...data,
+          [key]: val,
+          no_of_blanks: 0,
+          blank_options: [],
+        });
     } else {
       setData({
         ...data,
         [key]: val,
       });
-      sendData({
-        ...data,
-        [key]: val,
-      });
+      status !== 2 &&
+        sendData({
+          ...data,
+          [key]: val,
+        });
     }
   };
 
@@ -78,10 +86,11 @@ const QuestionConfig: FC<QuestionConfigProps> = ({ propData, sendData }) => {
       ...data,
       blank_options: blankOptions,
     });
-    sendData({
-      ...data,
-      blank_options: blankOptions,
-    });
+    status !== 2 &&
+      sendData({
+        ...data,
+        blank_options: blankOptions,
+      });
   };
 
   const getQuestionTypes = async () => {
@@ -110,15 +119,16 @@ const QuestionConfig: FC<QuestionConfigProps> = ({ propData, sendData }) => {
       isThisPassageHaveQuestion: "",
       no_of_options: 0,
     });
-    sendData({
-      ...data,
-      question_type: e,
-      blank_options: [],
-      isThereBlanks: false,
-      no_of_blanks: 0,
-      isThisPassageHaveQuestion: "",
-      no_of_options: 0,
-    });
+    status !== 2 &&
+      sendData({
+        ...data,
+        question_type: e,
+        blank_options: [],
+        isThereBlanks: false,
+        no_of_blanks: 0,
+        isThisPassageHaveQuestion: "",
+        no_of_options: 0,
+      });
   };
 
   const showHide = (value: TShowHide): boolean => {
@@ -143,7 +153,8 @@ const QuestionConfig: FC<QuestionConfigProps> = ({ propData, sendData }) => {
   }, []);
 
   return (
-    <div className="bg-blue-50 rounded p-3 my-2">
+    <div className="bg-blue-50 rounded p-3 my-2 relative">
+      <div className="absolute top-0 right-0 w-full h-full z-50 bg-black bg-opacity-10 rounded-lg"></div>
       <Label>Question Configuration </Label>
       <div className="grid grid-cols-12 gap-2 bg-white p-3 rounded-md my-2">
         <div className="my-3 col-span-12 sm:col-span-6 md:col-span-4">
@@ -170,7 +181,7 @@ const QuestionConfig: FC<QuestionConfigProps> = ({ propData, sendData }) => {
         <div className="my-3 col-span-12 sm:col-span-6 md:col-span-4">
           <Label>Question Mode</Label>
           <Select
-            onValueChange={(e) => handleInputs(e , 'mode')}
+            onValueChange={(e) => handleInputs(e, "mode")}
             defaultValue={data.mode}
           >
             <SelectTrigger>

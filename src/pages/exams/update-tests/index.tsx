@@ -21,20 +21,21 @@ import { ChangeEvent, useEffect, useState } from "react";
 import api from "@/api/api";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import QuestionConfig from "../create-tests/__comps/create-questions/question-config";
-import NonBlankBlock from "../create-tests/__comps/create-questions/nonBlanks";
-import BlanksBlock from "../create-tests/__comps/create-questions/blanks";
+import QuestionConfig from "./__comps/create-questions/question-config";
+import NonBlankBlock from "./__comps/create-questions/nonBlanks";
+import BlanksBlock from "./__comps/create-questions/blanks";
 import Swal from "sweetalert2";
 import { useToast } from "@/components/ui/use-toast";
 import { INonBlankBlock, IQuestionsConfig } from "./types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import test from "node:test";
 import { Alert } from "@/components/ui/alert";
 
 interface ITestData {
   pattren: string;
   testTitle: string;
+  status?: number;
+
   sections: ISection[];
 }
 
@@ -89,7 +90,6 @@ const CreateTest = () => {
       },
     ],
   };
-
   const { toast } = useToast();
   const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(true);
@@ -227,13 +227,8 @@ const CreateTest = () => {
       });
       const { status, data } = res;
       if (status === 200) {
-        // setTestData((prev) => ({
-        //   ...prev,
-        //   pattren: data.data.pattren,
-        //   testTitle: data.data.testTitle,
-        // }));
         getSectionsData(Number(data.data.pattren));
-        setTestData(data.data)
+        setTestData(data.data);
         setLoading(false);
       }
     } catch (e) {
@@ -522,7 +517,7 @@ const CreateTest = () => {
                                       <QuestionConfig
                                         propData={
                                           getQuestionValues(sectionIdx, index)
-                                            .questions_config
+                                            ?.questions_config
                                         }
                                         sendData={(e) =>
                                           setQuestionConfigs(
@@ -532,6 +527,7 @@ const CreateTest = () => {
                                             e
                                           )
                                         }
+                                        status={testData?.status}
                                       />
 
                                       {/* Passage */}
@@ -707,14 +703,17 @@ const CreateTest = () => {
               <div className="mt-3 flex justify-between items-center w-full p-3 space-x-2 text-sm font-medium text-center text-gray-500 bg-white border border-gray-200 rounded-lg shadow-sm dark:text-gray-400 sm:text-base dark:bg-gray-800 dark:border-gray-700 sm:p-4 sm:space-x-4 rtl:space-x-reverse">
                 {!formSubmit && (
                   <>
-                    <Button
-                      disabled={formSubmit}
-                      variant="outline"
-                      className="border-orange-400"
-                      onClick={takeABreak}
-                    >
-                      Take a Break
-                    </Button>
+                    {testData?.status !== 1 && (
+                      <Button
+                        disabled={formSubmit}
+                        variant="outline"
+                        className="border-orange-400"
+                        onClick={takeABreak}
+                      >
+                        Take a Break
+                      </Button>
+                    )}
+
                     <Button
                       disabled={formSubmit}
                       variant="outline"
