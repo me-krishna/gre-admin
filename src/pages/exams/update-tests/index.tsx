@@ -161,6 +161,7 @@ const UpdateTests = () => {
   /* End of Utils */
   /* Input Handlers */
   const setQuestionConfigs = (si: number, qi: number, key: any, val: any) => {
+    console.log(si, qi, key, val , 'changes in data');
     setTestData((prev) => ({
       ...prev,
       sections: prev.sections.map((section, secIndx) => ({
@@ -538,6 +539,7 @@ const UpdateTests = () => {
                                             ?.questions_config
                                         }
                                         sendData={(e) =>{
+                                          console.log(e, 'data');
                                           setQuestionConfigs(
                                             sectionIdx,
                                             index,
