@@ -38,13 +38,12 @@ const QuestionConfig: FC<QuestionConfigProps> = ({
           : data.blank_options.concat(
               Array.from({ length: val - data.no_of_blanks }, () => 0)
             );
-      // Array.from({ length: val }, () => 0);
       setData({
         ...data,
         [key]: val,
         blank_options: blankOptions,
       });
-      status !== 2 &&
+      status != 2 &&
         sendData({
           ...data,
           [key]: val,
@@ -59,7 +58,7 @@ const QuestionConfig: FC<QuestionConfigProps> = ({
         no_of_blanks: 0,
         blank_options: [],
       });
-      status !== 2 &&
+      status != 2 &&
         sendData({
           ...data,
           [key]: val,
@@ -71,7 +70,7 @@ const QuestionConfig: FC<QuestionConfigProps> = ({
         ...data,
         [key]: val,
       });
-      status !== 2 &&
+      status != 2 &&
         sendData({
           ...data,
           [key]: val,
@@ -86,7 +85,7 @@ const QuestionConfig: FC<QuestionConfigProps> = ({
       ...data,
       blank_options: blankOptions,
     });
-    status !== 2 &&
+    status != 2 &&
       sendData({
         ...data,
         blank_options: blankOptions,
@@ -110,25 +109,26 @@ const QuestionConfig: FC<QuestionConfigProps> = ({
   };
 
   const handleQuestionType = (e: string) => {
-    setData({
-      ...data,
-      question_type: e,
-      blank_options: [],
-      isThereBlanks: false,
-      no_of_blanks: 0,
-      isThisPassageHaveQuestion: "",
-      no_of_options: 0,
-    });
-    status !== 2 &&
-      sendData({
-        ...data,
-        question_type: e,
-        blank_options: [],
-        isThereBlanks: false,
-        no_of_blanks: 0,
-        isThisPassageHaveQuestion: "",
-        no_of_options: 0,
-      });
+    // status !== 2
+    //   &&
+       sendData({
+          ...data,
+          question_type: e,
+          blank_options: [],
+          isThereBlanks: false,
+          no_of_blanks: 0,
+          isThisPassageHaveQuestion: "",
+          no_of_options: 0,
+        })
+       setData({
+          ...data,
+          question_type: e,
+          blank_options: [],
+          isThereBlanks: false,
+          no_of_blanks: 0,
+          isThisPassageHaveQuestion: "",
+          no_of_options: 0,
+        });
   };
 
   const showHide = (value: TShowHide): boolean => {
@@ -154,7 +154,9 @@ const QuestionConfig: FC<QuestionConfigProps> = ({
 
   return (
     <div className="bg-blue-50 rounded p-3 my-2 relative">
-    {status!==2 &&  <div className="absolute top-0 right-0 w-full h-full z-50 bg-black bg-opacity-10 rounded-lg"></div> }
+      {status != 2 && (
+        <div className="absolute top-0 right-0 w-full h-full z-50 bg-black bg-opacity-10 rounded-lg"></div>
+      )}
       <Label>Question Configuration </Label>
       <div className="grid grid-cols-12 gap-2 bg-white p-3 rounded-md my-2">
         <div className="my-3 col-span-12 sm:col-span-6 md:col-span-4">

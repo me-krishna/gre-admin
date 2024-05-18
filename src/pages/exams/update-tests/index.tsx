@@ -21,9 +21,9 @@ import { ChangeEvent, useEffect, useState } from "react";
 import api from "@/api/api";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import QuestionConfig from "./__comps/create-questions/question-config";
-import NonBlankBlock from "./__comps/create-questions/nonBlanks";
-import BlanksBlock from "./__comps/create-questions/blanks";
+import QuestionConfig from "./__comps/update-questions/question-config";
+import NonBlankBlock from "./__comps/update-questions/nonBlanks";
+import BlanksBlock from "./__comps/update-questions/blanks";
 import Swal from "sweetalert2";
 import { useToast } from "@/components/ui/use-toast";
 import { INonBlankBlock, IQuestionsConfig } from "./types";
@@ -147,8 +147,8 @@ const UpdateTests = () => {
     switch (value) {
       case "question":
         return (
-          getQuestionValues(sectionIndex, questionIndex).questions_config
-            .question_type === "type2" ||
+          (getQuestionValues(sectionIndex, questionIndex).questions_config
+            .question_type === "type2") ||
           (getQuestionValues(sectionIndex, questionIndex).questions_config
             .question_type === "type1" &&
             getQuestionValues(sectionIndex, questionIndex).questions_config
@@ -537,13 +537,14 @@ const UpdateTests = () => {
                                           getQuestionValues(sectionIdx, index)
                                             ?.questions_config
                                         }
-                                        sendData={(e) =>
+                                        sendData={(e) =>{
                                           setQuestionConfigs(
                                             sectionIdx,
                                             index,
                                             "questions_config",
                                             e
                                           )
+                                        }
                                         }
                                         status={testData?.status}
                                       />

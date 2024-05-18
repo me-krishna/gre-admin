@@ -2,6 +2,7 @@ import { FC, useEffect, useState } from "react";
 import { INonBlankBlock } from "../../types";
 import NonBlankBlock from "./nonBlanks";
 import { Label } from "@/components/ui/label";
+import { v4 } from "uuid";
 
 interface NonBlankBlockProps {
   blank_options: number[];
@@ -42,7 +43,7 @@ const BlanksBlock: FC<NonBlankBlockProps> = ({
           <div className=" col-span-12 sm:col-span-6 md:col-span-4 bg-slate-900 p-3 rounded-xl">
             <Label className="text-white">Blank {index + 1} Options And Answers</Label>
             <NonBlankBlock
-              key={"block-blanks-" + index}
+              key={"block-blanks-" + v4()}
               noOfOptions={options}
               getData={{
                 options: data[index]?.options || [],

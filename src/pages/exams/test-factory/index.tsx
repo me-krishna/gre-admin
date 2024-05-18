@@ -58,7 +58,6 @@ const TestFactory = () => {
       const { data, status } = res;
       if (status === 200) {
         setData(data.data);
-        console.log(data.data);
         setPaginationData((prev) => {
           return {
             ...prev,
