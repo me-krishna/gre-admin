@@ -17,7 +17,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/custom/button";
 import { PasswordInput } from "@/components/custom/password-input";
-import { cn } from "@/lib/utils";
+import { cn, errorMsg } from "@/lib/utils";
+import api from "@/api/api";
+import { AxiosError } from "axios";
 
 interface UserAuthFormProps extends HTMLAttributes<HTMLDivElement> {}
 
@@ -44,23 +46,47 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     },
   });
 
+  const onLogin = async (e:any) => {
+    try {
+      const res = await api.post("/login", {
+        email: e.userName,
+        password: e.password,
+        type: "admin",
+      });
+      const { data, status } = res;
+      if (status === 200) {
+        localStorage.setItem('token', data.data.token);
+        localStorage.setItem("USER-REF-DETAILS", JSON.stringify(data.data.user));
+      setIsLoading(false);
+      nav("/");
+      } else {
+        errorMsg(data.data.message);
+      }
+    } catch (err:any) {
+      errorMsg(
+        err instanceof AxiosError
+          ? err.response?.data.message
+          : err instanceof Error
+          ? err.message
+          : "An error occurred"
+      );
+      setIsLoading(false);
+    }
+  };
+
   function onSubmit(data: z.infer<typeof formSchema>) {
     setIsLoading(true);
 
-    const user = Users.find(
-      (user) =>
-        user.username.trim() === data.userName.trim() &&
-        user.password.trim() === data.password.trim()
-    );
+     onLogin(data)
 
-    if (user) {
-      localStorage.setItem("USER-REF-DETAILS", JSON.stringify(user));
-      setIsLoading(false);
-      nav("/");
-    } else {
-      alert("Invalid username or password");
-      setIsLoading(false);
-    }
+    // if (user) {
+    //   localStorage.setItem("USER-REF-DETAILS", JSON.stringify(user));
+    //   setIsLoading(false);
+    //   nav("/");
+    // } else {
+    //   alert("Invalid username or password");
+    //   setIsLoading(false);
+    // }
   }
 
   return (

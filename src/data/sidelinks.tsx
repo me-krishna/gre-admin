@@ -2,9 +2,7 @@ import {
   IconLayoutDashboard,
   IconUsersGroup,
   IconFilePencil,
-  IconEyeCheck,
   IconPencilQuestion,
-  IconNotebook,
   IconDeviceIpadQuestion,
 } from "@tabler/icons-react";
 
@@ -27,35 +25,47 @@ export const sidelinks: SideLink[] = [
     icon: <IconLayoutDashboard size={18} />,
   },
   {
-    title: "Mock Test",
-    label: "",
-    href: "/mock-test",
-    icon: <IconFilePencil size={18} />,
-  },
-  {
     title: "Students",
     label: "",
     href: "/students",
     icon: <IconUsersGroup size={18} />,
   },
+  // {
+  //   title: "Questions Factory",
+  //   label: "",
+  //   href: "/questions-factory",
+  //   icon: <IconDeviceIpadQuestion size={18} />,
+  // },
   {
-    title: "Questions Factory",
+    title: "Test Patterns",
     label: "",
-    href: "/questions-factory",
-    icon: <IconDeviceIpadQuestion size={18} />,
+    href: "/tests/test-pattern",
+    icon: <IconFilePencil size={18} />,
   },
   {
-    title: "Tests",
+    title: "Tests Factory",
     label: "",
-    href: "#",
-    icon: <IconNotebook size={18} />,
-    sub: [
-      {
-        title: "Test Patterns",
-        label: "",
-        href: "/tests/test-pattern",
-        icon: <IconFilePencil size={18} />,
-      }
-    ],
+    href: "/tests/test-factory",
+    icon: <IconPencilQuestion size={18} />,
   },
+  // {
+  //   title: "Tests",
+  //   label: "",
+  //   href: "#",
+  //   icon: <IconNotebook size={18} />,
+  //   sub: [
+  //     {
+  //       title: "Test Patterns",
+  //       label: "",
+  //       href: "/tests/test-pattern",
+  //       icon: <IconFilePencil size={18} />,
+  //     },
+  //     {
+  //       title: "Tests Factory",
+  //       label: "",
+  //       href: "/tests/test-factory",
+  //       icon: <IconPencilQuestion size={18} />,
+  //     },
+  //   ],
+  // },
 ];

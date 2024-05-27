@@ -31,7 +31,7 @@ export default function AppShell() {
               {/* ===== Top Heading ===== */}
               <LayoutHeader>
                 <div className="ml-auto flex items-center space-x-4">
-                  <ThemeSwitch />
+                  {/* <ThemeSwitch /> */}
                   <UserNav />
                 </div>
               </LayoutHeader>

@@ -34,15 +34,27 @@ const router = createBrowserRouter([
         }),
       },
       {
-        path: "user-tracking",
-        lazy: async () => ({
-          Component: (await import("./pages/user-tracking")).default,
-        }),
-      },
-      {
         path: "tests/test-pattern",
         lazy: async () => ({
           Component: (await import("./pages/exams/mock-test")).default,
+        }),
+      },
+      {
+        path: "/tests/test-factory",
+        lazy: async () => ({
+          Component: (await import("./pages/exams/test-factory")).default,
+        }),
+      },
+      {
+        path: "tests/create-test",
+        lazy: async () => ({
+          Component: (await import("./pages/exams/create-tests")).default,
+        }),
+      },
+      {
+        path: "tests/update-test/:testId",
+        lazy: async () => ({
+          Component: (await import("./pages/exams/update-tests")).default,
         }),
       },
       {
@@ -66,14 +78,3 @@ const router = createBrowserRouter([
 ]);
 
 export default router;
-
-// {
-//   index: true,
-//   loader: async () => redirect("/reports/1"),
-// },
-// {
-//   path: "reports/:id",
-//   lazy: async () => ({
-//     Component: (await import("./pages/reports")).default,
-//   }),
-// },
