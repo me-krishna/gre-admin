@@ -30,12 +30,12 @@ export const sidelinks: SideLink[] = [
     href: "/students",
     icon: <IconUsersGroup size={18} />,
   },
-  {
-    title: "Questions Factory",
-    label: "",
-    href: "/questions-factory",
-    icon: <IconDeviceIpadQuestion size={18} />,
-  },
+  // {
+  //   title: "Questions Factory",
+  //   label: "",
+  //   href: "/questions-factory",
+  //   icon: <IconDeviceIpadQuestion size={18} />,
+  // },
   {
     title: "Test Patterns",
     label: "",
