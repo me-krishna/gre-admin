@@ -4,6 +4,7 @@
   "version": "1.0.3",
   "type": "module",
   "author": "PB Krishna Reddy",
+  "homepage": "/cms/",
   "scripts": {
     "dev": "vite --port 9002",
     "build": "tsc && vite build",

@@ -75,6 +75,8 @@ const router = createBrowserRouter([
 
   // Fallback 404 route
   { path: "*", Component: NotFoundError },
-]);
+],{
+  basename: import.meta.env.BASE_URL,
+});
 
 export default router;

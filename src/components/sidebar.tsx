@@ -46,11 +46,11 @@ export default function Sidebar2({
           <div>
             {/* Logo */}
             {!isCollapsed && (
-              <img src="/logos/logo.png" className=" h-10 drop-shadow-xl" />
+              <img src={`./logos/logo.png`} className=" h-10 drop-shadow-xl" />
             )}
             {isCollapsed && (
               <img
-                src="/logos/logo-sm.png"
+                src={`./logos/logo-sm.png`}
                 className=" h-10 drop-shadow-xl"
               />
             )}
