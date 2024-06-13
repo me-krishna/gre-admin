@@ -2,7 +2,7 @@ import { errorMsg } from '@/lib/utils';
 import axios from 'axios';
 const pathName = window.location.pathname;
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL as string,
+  baseURL: process.env.REACT_APP_API_URL as string,
   headers: {
     'Content-Type': 'application/json'
   },
