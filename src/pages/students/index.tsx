@@ -374,6 +374,7 @@ const Leads = () => {
                 <TableHead>Mobile</TableHead>
                 <TableHead>Password</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Welcome Email</TableHead>
                 <TableHead>Created At</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -403,6 +404,17 @@ const Leads = () => {
                     ) : (
                       <Badge className="bg-red-200 text-red-700 hover:bg-red-300 dark:bg-red-700 dark:text-red-200 dark:hover:bg-red-800">
                         In Active
+                      </Badge>
+                    )}{" "}
+                  </TableCell>
+                  <TableCell>
+                    {res.isWelcomeEmailSent === 1 ? (
+                      <Badge className="bg-green-200 text-green-700 hover:bg-green-300 dark:bg-green-700 dark:text-green-200 dark:hover:bg-green-800">
+                        Sent
+                      </Badge>
+                    ) : (
+                      <Badge className="bg-red-200 text-red-700 hover:bg-red-300 dark:bg-red-700 dark:text-red-200 dark:hover:bg-red-800">
+                        Not Sent
                       </Badge>
                     )}{" "}
                   </TableCell>
