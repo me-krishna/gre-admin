@@ -40,10 +40,9 @@ const BlanksBlock: FC<NonBlankBlockProps> = ({
     <div className="grid grid-cols-12 gap-2 my-2">
       {data.length > 0 &&
         blank_options.map((options, index) => (
-          <div className=" col-span-12 sm:col-span-6 md:col-span-4 bg-slate-900 p-3 rounded-xl">
+          <div key={v4()} className=" col-span-12 sm:col-span-6 md:col-span-4 bg-slate-900 p-3 rounded-xl">
             <Label className="text-white">Blank {index + 1} Options And Answers</Label>
             <NonBlankBlock
-              key={"block-blanks-" + v4()}
               noOfOptions={options}
               getData={{
                 options: data[index]?.options || [],

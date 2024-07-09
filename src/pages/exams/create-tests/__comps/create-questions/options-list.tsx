@@ -13,10 +13,12 @@ const OptionsList: FC<OptionsProps> = ({ noOfOptions, getData, sendData }) => {
 
   const handleChange = (value: string, index: number) => {
     setOptions((prev) => {
-      prev[index] = value;
-      return [...prev];
+      const newOptions = [...prev];
+      newOptions[index] = value;
+      return newOptions;
     });
-    sendData(options);
+    sendData(options.map((option, idx) => idx === index ? value : option));
+
   };
 
   useEffect(() => {

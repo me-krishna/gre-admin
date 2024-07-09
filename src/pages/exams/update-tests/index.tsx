@@ -147,11 +147,11 @@ const UpdateTests = () => {
     switch (value) {
       case "question":
         return (
-          (getQuestionValues(sectionIndex, questionIndex).questions_config
+          (getQuestionValues(sectionIndex, questionIndex)?.questions_config
             .question_type === "type2") ||
-          (getQuestionValues(sectionIndex, questionIndex).questions_config
+          (getQuestionValues(sectionIndex, questionIndex)?.questions_config
             .question_type === "type1" &&
-            getQuestionValues(sectionIndex, questionIndex).questions_config
+            getQuestionValues(sectionIndex, questionIndex)?.questions_config
               .isThisPassageHaveQuestion === "yes")
         );
       default:
@@ -218,73 +218,73 @@ const UpdateTests = () => {
       for (let i = 0; i < testData.sections.length; i++) {
         for (let j = 0; j < testData.sections[i].questions.length; j++) {
           const locData = testData.sections[i].questions[j];
-          if (locData.questions_config.question_type === "") {
+          if (locData?.questions_config.question_type === "") {
             return formErroMsg(
               `Please select question type for question ${j + 1} in section ${i + 1}`
             );
-          } else if (locData.questions_config.mode === "") {
+          } else if (locData?.questions_config.mode === "") {
             return formErroMsg(
               `Please select question mode for question ${j + 1} in section ${i + 1}`
             );
           } else if (
-            locData.questions_config.question_type === "type1" &&
-            locData.questions_config.isThisPassageHaveQuestion === ""
+            locData?.questions_config.question_type === "type1" &&
+            locData?.questions_config.isThisPassageHaveQuestion === ""
           ) {
             return formErroMsg(
               `Please select is this passage have question for question ${j + 1} in section ${i + 1}`
             );
           } else if (
-            locData.questions_config.question_type === "type2" &&
-            locData.questions_config.isThereBlanks === true &&
-            locData.questions_config.no_of_blanks === 0
+            locData?.questions_config.question_type === "type2" &&
+            locData?.questions_config.isThereBlanks === true &&
+            locData?.questions_config.no_of_blanks === 0
           ) {
             return formErroMsg(
               `Please enter number of blanks for question ${j + 1} in section ${i + 1}`
             );
           } else if (
-            locData.questions_config.no_of_blanks > 0 &&
-            locData.questions_config.blank_options.some((item) => item === 0)
+            locData?.questions_config.no_of_blanks > 0 &&
+            locData?.questions_config.blank_options.some((item) => item === 0)
           ) {
             return formErroMsg(
               `Please enter no:of options there in the blanks options for question ${j + 1} in section ${i + 1}`
             );
           } else if (
-            locData.questions_config.isThereHeaderInfo === true &&
+            locData?.questions_config.isThereHeaderInfo === true &&
             testData.sections[i].questions[
               j
-            ].questions_config.header_info.trim().length < 1
+            ]?.questions_config.header_info.trim().length < 1
           ) {
             return formErroMsg(
               `Please enter header info for question ${j + 1} in section ${i + 1}`
             );
           } else if (
-            locData.questions_config.isThereFooterInfo === true &&
+            locData?.questions_config.isThereFooterInfo === true &&
             testData.sections[i].questions[
               j
-            ].questions_config.footer_info.trim().length < 1
+            ]?.questions_config.footer_info.trim().length < 1
           ) {
             return formErroMsg(
               `Please enter footer info for question ${j + 1} in section ${i + 1}`
             );
           } else if (
-            (locData.questions_config.isThisPassageHaveQuestion === "yes" &&
-              locData.questions_config.no_of_options === 0) ||
-            (locData.questions_config.question_type === "type2" &&
-              locData.questions_config.isThereBlanks === false &&
-              locData.questions_config.no_of_options === 0)
+            (locData?.questions_config.isThisPassageHaveQuestion === "yes" &&
+              locData?.questions_config.no_of_options === 0) ||
+            (locData?.questions_config.question_type === "type2" &&
+              locData?.questions_config.isThereBlanks === false &&
+              locData?.questions_config.no_of_options === 0)
           ) {
             return formErroMsg(
               `Please enter number of options for question ${j + 1} in section ${i + 1}`
             );
           } else if (
-            locData.questions_config.question_type === "type1" &&
+            locData?.questions_config.question_type === "type1" &&
             locData.passage.trim().length === 0
           ) {
             return formErroMsg(
               `Please enter passage for question ${j + 1} in section ${i + 1}`
             );
           } else if (
-            locData.questions_config.isThisPassageHaveQuestion !== "no" &&
+            locData?.questions_config.isThisPassageHaveQuestion !== "no" &&
             locData.question === ""
           ) {
             return formErroMsg(
@@ -297,27 +297,27 @@ const UpdateTests = () => {
               }`
             );
           } else if (
-            ((locData.questions_config.question_type === "type1" &&
-              locData.questions_config.isThisPassageHaveQuestion === "yes") ||
-              (locData.questions_config.question_type === "type2" &&
-                locData.questions_config.isThereBlanks === false)) &&
+            ((locData?.questions_config.question_type === "type1" &&
+              locData?.questions_config.isThisPassageHaveQuestion === "yes") ||
+              (locData?.questions_config.question_type === "type2" &&
+                locData?.questions_config.isThereBlanks === false)) &&
             locData.nonBlanks.options.some((item) => item.trim().length === 0)
           ) {
             return formErroMsg(
               `Please enter all options for question ${j + 1} in section ${i + 1}`
             );
           } else if (
-            ((locData.questions_config.question_type === "type1" &&
-              locData.questions_config.isThisPassageHaveQuestion === "yes") ||
-              (locData.questions_config.question_type === "type2" &&
-                locData.questions_config.isThereBlanks === false)) &&
+            ((locData?.questions_config.question_type === "type1" &&
+              locData?.questions_config.isThisPassageHaveQuestion === "yes") ||
+              (locData?.questions_config.question_type === "type2" &&
+                locData?.questions_config.isThereBlanks === false)) &&
             locData.nonBlanks.answer.length === 0
           ) {
             return formErroMsg(
               `Please select answer for question ${j + 1} in section ${i + 1}`
             );
           } else if (
-            locData.questions_config.isThereBlanks === true &&
+            locData?.questions_config.isThereBlanks === true &&
             locData.blanks.every((item) =>
               item.options.some((opt) => opt.length === 0)
             )
@@ -326,7 +326,7 @@ const UpdateTests = () => {
               `Please enter all blanks options for question ${j + 1} in section ${i + 1}`
             );
           } else if (
-            locData.questions_config.isThereBlanks === true &&
+            locData?.questions_config.isThereBlanks === true &&
             locData.blanks.some((item) => item.answer.length === 0)
           ) {
             return formErroMsg(
@@ -414,7 +414,7 @@ const UpdateTests = () => {
           </Link>
         </div>
       </div>
-      {!loading && (
+      {!loading && testData!==undefined && (
         <Card>
           <CardContent>
             <div className="p-4">
@@ -553,7 +553,7 @@ const UpdateTests = () => {
 
                                       {/* Passage */}
                                       {getQuestionValues(sectionIdx, index)
-                                        .questions_config.question_type ===
+                                        ?.questions_config.question_type ===
                                         "type1" && (
                                         <div className="bg-amber-50 rounded p-3 my-2">
                                           <Label>Passage</Label>
@@ -627,7 +627,7 @@ const UpdateTests = () => {
                                           }
                                           data={
                                             getQuestionValues(sectionIdx, index)
-                                              .explination
+                                              ?.explination
                                           }
                                           placeholder="Enter Explination Here..."
                                           onChange={(value) =>
@@ -643,15 +643,15 @@ const UpdateTests = () => {
 
                                       {/* Non Blanks */}
                                       {getQuestionValues(sectionIdx, index)
-                                        .questions_config.no_of_options > 0 && (
+                                        ?.questions_config.no_of_options > 0 && (
                                         <NonBlankBlock
                                           noOfOptions={
                                             getQuestionValues(sectionIdx, index)
-                                              .questions_config.no_of_options
+                                              ?.questions_config.no_of_options
                                           }
                                           getData={
                                             getQuestionValues(sectionIdx, index)
-                                              .nonBlanks
+                                              ?.nonBlanks
                                           }
                                           sendData={(options) =>
                                             setTestData((prev) => ({
@@ -682,11 +682,11 @@ const UpdateTests = () => {
                                       <BlanksBlock
                                         blank_options={
                                           getQuestionValues(sectionIdx, index)
-                                            .questions_config.blank_options
+                                            ?.questions_config.blank_options
                                         }
                                         getData={
                                           getQuestionValues(sectionIdx, index)
-                                            .blanks
+                                            ?.blanks
                                         }
                                         sendData={(options) => {
                                           setTestData((prev) => ({
