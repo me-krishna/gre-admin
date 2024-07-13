@@ -91,11 +91,7 @@ const router = createBrowserRouter(
     { path: "*", Component: NotFoundError },
   ],
   {
-<<<<<<< HEAD
     basename: import.meta.env.BASE_URL,
-=======
-    basename: process.env.PUBLIC_URL,
->>>>>>> origin/main
   }
 );
 

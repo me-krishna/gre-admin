@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // Create an axios instance with predefined baseURL and headers
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL as string,
+  baseURL: import.meta.env.VITE_API_URL as string,
   headers: {
     'Content-Type': 'application/json',
   },
