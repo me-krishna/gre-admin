@@ -4,6 +4,8 @@ import {
   IconFilePencil,
   IconPencilQuestion,
   IconDeviceIpadQuestion,
+  IconCategory,
+  IconCategoryPlus,
 } from "@tabler/icons-react";
 
 export interface NavLink {
@@ -29,6 +31,18 @@ export const sidelinks: SideLink[] = [
     label: "",
     href: "/students",
     icon: <IconUsersGroup size={18} />,
+  },
+  {
+    title: "Topics",
+    label: "",
+    href: "/topics",
+    icon: <IconCategory size={18} />,
+  },
+  {
+    title: "Sub Topics",
+    label: "",
+    href: "/sub-topics",
+    icon: <IconCategoryPlus size={18} />,
   },
   // {
   //   title: "Questions Factory",
