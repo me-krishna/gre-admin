@@ -31,6 +31,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Alert } from "@/components/ui/alert";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { v4 } from "uuid";
 
 interface ITestData {
   pattren: string;
@@ -48,6 +49,7 @@ interface IQuestions {
   explination: string;
   nonBlanks: INonBlankBlock;
   blanks: INonBlankBlock[];
+  subTopic: string;
 }
 
 type TOptions = string;
@@ -86,6 +88,7 @@ const UpdateTests = () => {
               answer: [],
             },
             blanks: [],
+            subTopic: "",
           },
         ],
       },
@@ -100,6 +103,7 @@ const UpdateTests = () => {
   const [formSubmit, setFormSubmit] = useState<boolean>(false);
   const [testData, setTestData] = useState<ITestData>(_initalTestData);
   const { testId } = useParams();
+  const [subTopicsList, setSubTopicsList] = useState<any[]>([]);
   /* API Handlers */
   const getExamsPattrens = async () => {
     try {
@@ -124,6 +128,7 @@ const UpdateTests = () => {
       const { status, data } = res;
       if (status === 200) {
         setListSections(data.data);
+        getSubTopicsList(data.data[0]?.topic_id);
       }
     } catch (e) {
       console.error(e);
@@ -133,7 +138,11 @@ const UpdateTests = () => {
 
   /* Utils */
 
-  const getQuestionValues = (sectionIdx: number, questionIdx: number) => {
+  const getQuestionValues = (
+    sectionIdx: number,
+    questionIdx: number,
+    test?: string
+  ) => {
     return testData?.sections[sectionIdx]?.questions[questionIdx];
   };
 
@@ -147,8 +156,8 @@ const UpdateTests = () => {
     switch (value) {
       case "question":
         return (
-          (getQuestionValues(sectionIndex, questionIndex)?.questions_config
-            .question_type === "type2") ||
+          getQuestionValues(sectionIndex, questionIndex)?.questions_config
+            .question_type === "type2" ||
           (getQuestionValues(sectionIndex, questionIndex)?.questions_config
             .question_type === "type1" &&
             getQuestionValues(sectionIndex, questionIndex)?.questions_config
@@ -161,7 +170,6 @@ const UpdateTests = () => {
   /* End of Utils */
   /* Input Handlers */
   const setQuestionConfigs = (si: number, qi: number, key: any, val: any) => {
-    console.log(si, qi, key, val , 'changes in data');
     setTestData((prev) => ({
       ...prev,
       sections: prev.sections.map((section, secIndx) => ({
@@ -397,6 +405,18 @@ const UpdateTests = () => {
     }
   };
 
+  const getSubTopicsList = async (id: number) => {
+    try {
+      const res = await api.get(`/subtopicsByTopic/${id}`);
+      const { status, data } = res;
+      if (status === 200) {
+        setSubTopicsList(data.data);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   useEffect(() => {
     getExamsPattrens();
     getDataFromTestsScreens();
@@ -414,7 +434,7 @@ const UpdateTests = () => {
           </Link>
         </div>
       </div>
-      {!loading && testData!==undefined && (
+      {!loading && testData !== undefined && (
         <Card>
           <CardContent>
             <div className="p-4">
@@ -507,7 +527,11 @@ const UpdateTests = () => {
                     >
                       <TabsList>
                         {listOfSections.map((section) => (
-                          <TabsTrigger key={section.uuid} value={section.uuid}>
+                          <TabsTrigger
+                            onClick={() => getSubTopicsList(section.topic_id)}
+                            key={section.uuid}
+                            value={section.uuid}
+                          >
                             {section.section_name}
                           </TabsTrigger>
                         ))}
@@ -531,6 +555,48 @@ const UpdateTests = () => {
                                     Question {index + 1}
                                   </AccordionTrigger>
                                   <AccordionContent>
+                                    {/* SubTopic */}
+                                    {subTopicsList?.length > 0 && (
+                                      <div className="bg-red-50 rounded p-3 my-2">
+                                        <div className="grid grid-cols-12 gap-2 bg-white p-3 rounded-md my-2">
+                                          <div className="my-3 col-span-12 sm:col-span-6 md:col-span-4">
+                                            <Label>Sub Topic</Label>
+                                            <Select
+                                              onValueChange={(value) =>
+                                                setQuestionConfigs(
+                                                  sectionIdx,
+                                                  index,
+                                                  "subTopic",
+                                                  value
+                                                )
+                                              }
+                                              defaultValue={
+                                                getQuestionValues(
+                                                  sectionIdx,
+                                                  index
+                                                ).subTopic
+                                              }
+                                            >
+                                              <SelectTrigger>
+                                                <SelectValue placeholder="Select Sub Topic" />
+                                              </SelectTrigger>
+                                              <SelectContent>
+                                                {subTopicsList.map((item) => (
+                                                  <SelectItem
+                                                    key={v4()}
+                                                    value={item.id.toString()}
+                                                  >
+                                                    {
+                                                      item.name
+                                                    }
+                                                  </SelectItem>
+                                                ))}
+                                              </SelectContent>
+                                            </Select>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )}
                                     <div>
                                       {/* Question Configaration */}
                                       <QuestionConfig
@@ -538,16 +604,14 @@ const UpdateTests = () => {
                                           getQuestionValues(sectionIdx, index)
                                             ?.questions_config
                                         }
-                                        sendData={(e) =>{
-                                          console.log(e, 'data');
+                                        sendData={(e) => {
                                           setQuestionConfigs(
                                             sectionIdx,
                                             index,
                                             "questions_config",
                                             e
-                                          )
-                                        }
-                                        }
+                                          );
+                                        }}
                                         status={testData?.status}
                                       />
 
@@ -643,7 +707,8 @@ const UpdateTests = () => {
 
                                       {/* Non Blanks */}
                                       {getQuestionValues(sectionIdx, index)
-                                        ?.questions_config.no_of_options > 0 && (
+                                        ?.questions_config.no_of_options >
+                                        0 && (
                                         <NonBlankBlock
                                           noOfOptions={
                                             getQuestionValues(sectionIdx, index)

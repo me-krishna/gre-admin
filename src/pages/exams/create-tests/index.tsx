@@ -38,6 +38,7 @@ import { INonBlankBlock, IQuestionsConfig } from "./types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link, useNavigate } from "react-router-dom";
 import test from "node:test";
+import { v4 } from "uuid";
 
 interface ITestData {
   pattren: string;
@@ -53,6 +54,7 @@ interface IQuestions {
   explination: string;
   nonBlanks: INonBlankBlock;
   blanks: INonBlankBlock[];
+  subTopic: string;
 }
 
 type TOptions = string;
@@ -91,6 +93,7 @@ const CreateTest = () => {
               answer: [],
             },
             blanks: [],
+            subTopic: "",
           },
         ],
       },
@@ -103,6 +106,7 @@ const CreateTest = () => {
   const [listOfSections, setListSections] = useState<any[]>([]);
   const [formSubmit, setFormSubmit] = useState<boolean>(false);
   const [testData, setTestData] = useState<ITestData>(_initalTestData);
+  const [subTopicsList, setSubTopicsList] = useState<any[]>([]);
 
   /* API Handlers */
   const getExamsPattrens = async () => {
@@ -153,11 +157,13 @@ const CreateTest = () => {
                 answer: [],
               },
               blanks: [],
+              subTopic: "",
             })),
           });
         });
         setTestData((prev) => ({ ...prev, sections: SectinsData }));
         setListSections(data.data);
+        getSubTopicsList(data.data[0]?.topic_id);
       }
     } catch (e) {
       console.error(e);
@@ -205,32 +211,6 @@ const CreateTest = () => {
             ? {
                 ...question,
                 [key]: val,
-              }
-            : question
-        ),
-      })),
-    }));
-  };
-
-  const handleAnswerNonBlanksOptions = (
-    value: any,
-    optionIndex: number,
-    sectionIndex: number,
-    questionIndex: number
-  ) => {
-    setTestData((prev) => ({
-      ...prev,
-      sections: prev.sections.map((section, secIndx) => ({
-        questions: section.questions.map((question, qIdx) =>
-          secIndx === sectionIndex && qIdx === questionIndex
-            ? {
-                ...question,
-                nonBlanks: {
-                  ...question.nonBlanks,
-                  options: question.nonBlanks.options.map((option, oIdx) =>
-                    oIdx === optionIndex ? value : option
-                  ),
-                },
               }
             : question
         ),
@@ -357,10 +337,9 @@ const CreateTest = () => {
             );
           } else if (
             ((locData.questions_config.question_type === "type1" &&
-            locData.questions_config.isThisPassageHaveQuestion === "yes") || (
-            locData.questions_config.question_type === "type2" &&
-            locData.questions_config.isThereBlanks === false
-            ))&&
+              locData.questions_config.isThisPassageHaveQuestion === "yes") ||
+              (locData.questions_config.question_type === "type2" &&
+                locData.questions_config.isThereBlanks === false)) &&
             locData.nonBlanks.answer.length === 0
           ) {
             return formErroMsg(
@@ -447,6 +426,18 @@ const CreateTest = () => {
     }
   };
 
+  const getSubTopicsList = async (id: number) => {
+    try {
+      const res = await api.get(`/subtopicsByTopic/${id}`);
+      const { status, data } = res;
+      if (status === 200) {
+        setSubTopicsList(data.data);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   useEffect(() => {
     getExamsPattrens();
   }, []);
@@ -507,7 +498,11 @@ const CreateTest = () => {
                   >
                     <TabsList>
                       {listOfSections.map((section) => (
-                        <TabsTrigger key={section.uuid} value={section.uuid}>
+                        <TabsTrigger
+                          onClick={() => getSubTopicsList(section.topic_id)}
+                          key={section.uuid}
+                          value={section.uuid}
+                        >
                           {section.section_name}
                         </TabsTrigger>
                       ))}
@@ -532,6 +527,46 @@ const CreateTest = () => {
                                 </AccordionTrigger>
                                 <AccordionContent>
                                   <div>
+                                    {/* SubTopic */}
+                                    {subTopicsList?.length > 0 && (
+                                      <div className="bg-red-50 rounded p-3 my-2">
+                                        <div className="grid grid-cols-12 gap-2 bg-white p-3 rounded-md my-2">
+                                          <div className="my-3 col-span-12 sm:col-span-6 md:col-span-4">
+                                            <Label>Sub Topic</Label>
+                                            <Select
+                                              onValueChange={(value) =>
+                                                setQuestionConfigs(
+                                                  sectionIdx,
+                                                  index,
+                                                  "subTopic",
+                                                  value
+                                                )
+                                              }
+                                              defaultValue={
+                                                getQuestionValues(
+                                                  sectionIdx,
+                                                  index
+                                                ).subTopic
+                                              }
+                                            >
+                                              <SelectTrigger>
+                                                <SelectValue placeholder="Select Sub Topic" />
+                                              </SelectTrigger>
+                                              <SelectContent>
+                                                {subTopicsList.map((item) => (
+                                                  <SelectItem
+                                                    key={v4()}
+                                                    value={item.id.toString()}
+                                                  >
+                                                    {item.name}
+                                                  </SelectItem>
+                                                ))}
+                                              </SelectContent>
+                                            </Select>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )}
                                     {/* Question Configaration */}
                                     <QuestionConfig
                                       propData={
