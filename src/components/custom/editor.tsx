@@ -15,7 +15,7 @@ const Editor: FC<EditorProps> = ({
   filedName,
   onChange,
   placeholder = "Enter Here...",
-  data
+  data,
 }) => {
   const toolBar = [
     "undo",
@@ -44,7 +44,7 @@ const Editor: FC<EditorProps> = ({
           toolbar: toolBar,
           ckfinder: {
             uploadUrl:
-              (import.meta.env.VITE_API_URL as string) + "/single-upload",
+              (process.env.REACT_APP_API_URL as string) + "/single-upload",
           },
         }}
         data={data}
